@@ -1,0 +1,2388 @@
+/* Minification failed. Returning unminified contents.
+(2247,11-12): run-time error JS1010: Expected identifier: .
+(2247,11-12): run-time error JS1195: Expected expression: .
+ */
+/*! modernizr 3.6.0 (Custom Build) | MIT *
+ * https://modernizr.com/download/?-video-setclasses !*/
+!function (e, n, a) { function o(e, n) { return typeof e === n } function s() { var e, n, a, s, t, c, r; for (var p in l) if (l.hasOwnProperty(p)) { if (e = [], n = l[p], n.name && (e.push(n.name.toLowerCase()), n.options && n.options.aliases && n.options.aliases.length)) for (a = 0; a < n.options.aliases.length; a++) e.push(n.options.aliases[a].toLowerCase()); for (s = o(n.fn, "function") ? n.fn() : n.fn, t = 0; t < e.length; t++) c = e[t], r = c.split("."), 1 === r.length ? Modernizr[r[0]] = s : (!Modernizr[r[0]] || Modernizr[r[0]] instanceof Boolean || (Modernizr[r[0]] = new Boolean(Modernizr[r[0]])), Modernizr[r[0]][r[1]] = s), i.push((s ? "" : "no-") + r.join("-")) } } function t(e) { var n = p.className, a = Modernizr._config.classPrefix || ""; if (f && (n = n.baseVal), Modernizr._config.enableJSClass) { var o = new RegExp("(^|\\s)" + a + "no-js(\\s|$)"); n = n.replace(o, "$1" + a + "js$2") } Modernizr._config.enableClasses && (n += " " + a + e.join(" " + a), f ? p.className.baseVal = n : p.className = n) } function c() { return "function" != typeof n.createElement ? n.createElement(arguments[0]) : f ? n.createElementNS.call(n, "http://www.w3.org/2000/svg", arguments[0]) : n.createElement.apply(n, arguments) } var i = [], l = [], r = { _version: "3.6.0", _config: { classPrefix: "", enableClasses: !0, enableJSClass: !0, usePrefixes: !0 }, _q: [], on: function (e, n) { var a = this; setTimeout(function () { n(a[e]) }, 0) }, addTest: function (e, n, a) { l.push({ name: e, fn: n, options: a }) }, addAsyncTest: function (e) { l.push({ name: null, fn: e }) } }, Modernizr = function () { }; Modernizr.prototype = r, Modernizr = new Modernizr; var p = n.documentElement, f = "svg" === p.nodeName.toLowerCase(); Modernizr.addTest("video", function () { var e = c("video"), n = !1; try { n = !!e.canPlayType, n && (n = new Boolean(n), n.ogg = e.canPlayType('video/ogg; codecs="theora"').replace(/^no$/, ""), n.h264 = e.canPlayType('video/mp4; codecs="avc1.42E01E"').replace(/^no$/, ""), n.webm = e.canPlayType('video/webm; codecs="vp8, vorbis"').replace(/^no$/, ""), n.vp9 = e.canPlayType('video/webm; codecs="vp9"').replace(/^no$/, ""), n.hls = e.canPlayType('application/x-mpegURL; codecs="avc1.42E01E"').replace(/^no$/, "")) } catch (a) { } return n }), s(), t(i), delete r.addTest, delete r.addAsyncTest; for (var d = 0; d < Modernizr._q.length; d++) Modernizr._q[d](); e.Modernizr = Modernizr }(window, document);;
+/*!
+ * JavaScript Cookie v2.1.3
+ * https://github.com/js-cookie/js-cookie
+ *
+ * Copyright 2006, 2015 Klaus Hartl & Fagner Brack
+ * Released under the MIT license
+ */
+;(function (factory) {
+	var registeredInModuleLoader = false;
+	if (typeof define === 'function' && define.amd) {
+		define(factory);
+		registeredInModuleLoader = true;
+	}
+	if (typeof exports === 'object') {
+		module.exports = factory();
+		registeredInModuleLoader = true;
+	}
+	if (!registeredInModuleLoader) {
+		var OldCookies = window.Cookies;
+		var api = window.Cookies = factory();
+		api.noConflict = function () {
+			window.Cookies = OldCookies;
+			return api;
+		};
+	}
+}(function () {
+	function extend () {
+		var i = 0;
+		var result = {};
+		for (; i < arguments.length; i++) {
+			var attributes = arguments[ i ];
+			for (var key in attributes) {
+				result[key] = attributes[key];
+			}
+		}
+		return result;
+	}
+
+	function init (converter) {
+		function api (key, value, attributes) {
+			var result;
+			if (typeof document === 'undefined') {
+				return;
+			}
+
+			// Write
+
+			if (arguments.length > 1) {
+				attributes = extend({
+					path: '/'
+				}, api.defaults, attributes);
+
+				if (typeof attributes.expires === 'number') {
+					var expires = new Date();
+					expires.setMilliseconds(expires.getMilliseconds() + attributes.expires * 864e+5);
+					attributes.expires = expires;
+				}
+
+				// We're using "expires" because "max-age" is not supported by IE
+				attributes.expires = attributes.expires ? attributes.expires.toUTCString() : '';
+
+				try {
+					result = JSON.stringify(value);
+					if (/^[\{\[]/.test(result)) {
+						value = result;
+					}
+				} catch (e) {}
+
+				if (!converter.write) {
+					value = encodeURIComponent(String(value))
+						.replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
+				} else {
+					value = converter.write(value, key);
+				}
+
+				key = encodeURIComponent(String(key));
+				key = key.replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent);
+				key = key.replace(/[\(\)]/g, escape);
+
+				var stringifiedAttributes = '';
+
+				for (var attributeName in attributes) {
+					if (!attributes[attributeName]) {
+						continue;
+					}
+					stringifiedAttributes += '; ' + attributeName;
+					if (attributes[attributeName] === true) {
+						continue;
+					}
+					stringifiedAttributes += '=' + attributes[attributeName];
+				}
+				return (document.cookie = key + '=' + value + stringifiedAttributes);
+			}
+
+			// Read
+
+			if (!key) {
+				result = {};
+			}
+
+			// To prevent the for loop in the first place assign an empty array
+			// in case there are no cookies at all. Also prevents odd result when
+			// calling "get()"
+			var cookies = document.cookie ? document.cookie.split('; ') : [];
+			var rdecode = /(%[0-9A-Z]{2})+/g;
+			var i = 0;
+
+			for (; i < cookies.length; i++) {
+				var parts = cookies[i].split('=');
+				var cookie = parts.slice(1).join('=');
+
+				if (cookie.charAt(0) === '"') {
+					cookie = cookie.slice(1, -1);
+				}
+
+				try {
+					var name = parts[0].replace(rdecode, decodeURIComponent);
+					cookie = converter.read ?
+						converter.read(cookie, name) : converter(cookie, name) ||
+						cookie.replace(rdecode, decodeURIComponent);
+
+					if (this.json) {
+						try {
+							cookie = JSON.parse(cookie);
+						} catch (e) {}
+					}
+
+					if (key === name) {
+						result = cookie;
+						break;
+					}
+
+					if (!key) {
+						result[name] = cookie;
+					}
+				} catch (e) {}
+			}
+
+			return result;
+		}
+
+		api.set = api;
+		api.get = function (key) {
+			return api.call(api, key);
+		};
+		api.getJSON = function () {
+			return api.apply({
+				json: true
+			}, [].slice.call(arguments));
+		};
+		api.defaults = {};
+
+		api.remove = function (key, attributes) {
+			api(key, '', extend(attributes, {
+				expires: -1
+			}));
+		};
+
+		api.withConverter = init;
+
+		return api;
+	}
+
+	return init(function () {});
+}));;
+/*
+     _ _      _       _
+ ___| (_) ___| | __  (_)___
+/ __| | |/ __| |/ /  | / __|
+\__ \ | | (__|   < _ | \__ \
+|___/_|_|\___|_|\_(_)/ |___/
+                   |__/
+
+ Version: 1.6.0
+  Author: Ken Wheeler
+ Website: http://kenwheeler.github.io
+    Docs: http://kenwheeler.github.io/slick
+    Repo: http://github.com/kenwheeler/slick
+  Issues: http://github.com/kenwheeler/slick/issues
+
+ */
+!function(a){"use strict";"function"==typeof define&&define.amd?define(["jquery"],a):"undefined"!=typeof exports?module.exports=a(require("jquery")):a(jQuery)}(function(a){"use strict";var b=window.Slick||{};b=function(){function c(c,d){var f,e=this;e.defaults={accessibility:!0,adaptiveHeight:!1,appendArrows:a(c),appendDots:a(c),arrows:!0,asNavFor:null,prevArrow:'<button type="button" data-role="none" class="slick-prev" aria-label="Previous" tabindex="0" role="button">Previous</button>',nextArrow:'<button type="button" data-role="none" class="slick-next" aria-label="Next" tabindex="0" role="button">Next</button>',autoplay:!1,autoplaySpeed:3e3,centerMode:!1,centerPadding:"50px",cssEase:"ease",customPaging:function(b,c){return a('<button type="button" data-role="none" role="button" tabindex="0" />').text(c+1)},dots:!1,dotsClass:"slick-dots",draggable:!0,easing:"linear",edgeFriction:.35,fade:!1,focusOnSelect:!1,infinite:!0,initialSlide:0,lazyLoad:"ondemand",mobileFirst:!1,pauseOnHover:!0,pauseOnFocus:!0,pauseOnDotsHover:!1,respondTo:"window",responsive:null,rows:1,rtl:!1,slide:"",slidesPerRow:1,slidesToShow:1,slidesToScroll:1,speed:500,swipe:!0,swipeToSlide:!1,touchMove:!0,touchThreshold:5,useCSS:!0,useTransform:!0,variableWidth:!1,vertical:!1,verticalSwiping:!1,waitForAnimate:!0,zIndex:1e3},e.initials={animating:!1,dragging:!1,autoPlayTimer:null,currentDirection:0,currentLeft:null,currentSlide:0,direction:1,$dots:null,listWidth:null,listHeight:null,loadIndex:0,$nextArrow:null,$prevArrow:null,slideCount:null,slideWidth:null,$slideTrack:null,$slides:null,sliding:!1,slideOffset:0,swipeLeft:null,$list:null,touchObject:{},transformsEnabled:!1,unslicked:!1},a.extend(e,e.initials),e.activeBreakpoint=null,e.animType=null,e.animProp=null,e.breakpoints=[],e.breakpointSettings=[],e.cssTransitions=!1,e.focussed=!1,e.interrupted=!1,e.hidden="hidden",e.paused=!0,e.positionProp=null,e.respondTo=null,e.rowCount=1,e.shouldClick=!0,e.$slider=a(c),e.$slidesCache=null,e.transformType=null,e.transitionType=null,e.visibilityChange="visibilitychange",e.windowWidth=0,e.windowTimer=null,f=a(c).data("slick")||{},e.options=a.extend({},e.defaults,d,f),e.currentSlide=e.options.initialSlide,e.originalSettings=e.options,"undefined"!=typeof document.mozHidden?(e.hidden="mozHidden",e.visibilityChange="mozvisibilitychange"):"undefined"!=typeof document.webkitHidden&&(e.hidden="webkitHidden",e.visibilityChange="webkitvisibilitychange"),e.autoPlay=a.proxy(e.autoPlay,e),e.autoPlayClear=a.proxy(e.autoPlayClear,e),e.autoPlayIterator=a.proxy(e.autoPlayIterator,e),e.changeSlide=a.proxy(e.changeSlide,e),e.clickHandler=a.proxy(e.clickHandler,e),e.selectHandler=a.proxy(e.selectHandler,e),e.setPosition=a.proxy(e.setPosition,e),e.swipeHandler=a.proxy(e.swipeHandler,e),e.dragHandler=a.proxy(e.dragHandler,e),e.keyHandler=a.proxy(e.keyHandler,e),e.instanceUid=b++,e.htmlExpr=/^(?:\s*(<[\w\W]+>)[^>]*)$/,e.registerBreakpoints(),e.init(!0)}var b=0;return c}(),b.prototype.activateADA=function(){var a=this;a.$slideTrack.find(".slick-active").attr({"aria-hidden":"false"}).find("a, input, button, select").attr({tabindex:"0"})},b.prototype.addSlide=b.prototype.slickAdd=function(b,c,d){var e=this;if("boolean"==typeof c)d=c,c=null;else if(0>c||c>=e.slideCount)return!1;e.unload(),"number"==typeof c?0===c&&0===e.$slides.length?a(b).appendTo(e.$slideTrack):d?a(b).insertBefore(e.$slides.eq(c)):a(b).insertAfter(e.$slides.eq(c)):d===!0?a(b).prependTo(e.$slideTrack):a(b).appendTo(e.$slideTrack),e.$slides=e.$slideTrack.children(this.options.slide),e.$slideTrack.children(this.options.slide).detach(),e.$slideTrack.append(e.$slides),e.$slides.each(function(b,c){a(c).attr("data-slick-index",b)}),e.$slidesCache=e.$slides,e.reinit()},b.prototype.animateHeight=function(){var a=this;if(1===a.options.slidesToShow&&a.options.adaptiveHeight===!0&&a.options.vertical===!1){var b=a.$slides.eq(a.currentSlide).outerHeight(!0);a.$list.animate({height:b},a.options.speed)}},b.prototype.animateSlide=function(b,c){var d={},e=this;e.animateHeight(),e.options.rtl===!0&&e.options.vertical===!1&&(b=-b),e.transformsEnabled===!1?e.options.vertical===!1?e.$slideTrack.animate({left:b},e.options.speed,e.options.easing,c):e.$slideTrack.animate({top:b},e.options.speed,e.options.easing,c):e.cssTransitions===!1?(e.options.rtl===!0&&(e.currentLeft=-e.currentLeft),a({animStart:e.currentLeft}).animate({animStart:b},{duration:e.options.speed,easing:e.options.easing,step:function(a){a=Math.ceil(a),e.options.vertical===!1?(d[e.animType]="translate("+a+"px, 0px)",e.$slideTrack.css(d)):(d[e.animType]="translate(0px,"+a+"px)",e.$slideTrack.css(d))},complete:function(){c&&c.call()}})):(e.applyTransition(),b=Math.ceil(b),e.options.vertical===!1?d[e.animType]="translate3d("+b+"px, 0px, 0px)":d[e.animType]="translate3d(0px,"+b+"px, 0px)",e.$slideTrack.css(d),c&&setTimeout(function(){e.disableTransition(),c.call()},e.options.speed))},b.prototype.getNavTarget=function(){var b=this,c=b.options.asNavFor;return c&&null!==c&&(c=a(c).not(b.$slider)),c},b.prototype.asNavFor=function(b){var c=this,d=c.getNavTarget();null!==d&&"object"==typeof d&&d.each(function(){var c=a(this).slick("getSlick");c.unslicked||c.slideHandler(b,!0)})},b.prototype.applyTransition=function(a){var b=this,c={};b.options.fade===!1?c[b.transitionType]=b.transformType+" "+b.options.speed+"ms "+b.options.cssEase:c[b.transitionType]="opacity "+b.options.speed+"ms "+b.options.cssEase,b.options.fade===!1?b.$slideTrack.css(c):b.$slides.eq(a).css(c)},b.prototype.autoPlay=function(){var a=this;a.autoPlayClear(),a.slideCount>a.options.slidesToShow&&(a.autoPlayTimer=setInterval(a.autoPlayIterator,a.options.autoplaySpeed))},b.prototype.autoPlayClear=function(){var a=this;a.autoPlayTimer&&clearInterval(a.autoPlayTimer)},b.prototype.autoPlayIterator=function(){var a=this,b=a.currentSlide+a.options.slidesToScroll;a.paused||a.interrupted||a.focussed||(a.options.infinite===!1&&(1===a.direction&&a.currentSlide+1===a.slideCount-1?a.direction=0:0===a.direction&&(b=a.currentSlide-a.options.slidesToScroll,a.currentSlide-1===0&&(a.direction=1))),a.slideHandler(b))},b.prototype.buildArrows=function(){var b=this;b.options.arrows===!0&&(b.$prevArrow=a(b.options.prevArrow).addClass("slick-arrow"),b.$nextArrow=a(b.options.nextArrow).addClass("slick-arrow"),b.slideCount>b.options.slidesToShow?(b.$prevArrow.removeClass("slick-hidden").removeAttr("aria-hidden tabindex"),b.$nextArrow.removeClass("slick-hidden").removeAttr("aria-hidden tabindex"),b.htmlExpr.test(b.options.prevArrow)&&b.$prevArrow.prependTo(b.options.appendArrows),b.htmlExpr.test(b.options.nextArrow)&&b.$nextArrow.appendTo(b.options.appendArrows),b.options.infinite!==!0&&b.$prevArrow.addClass("slick-disabled").attr("aria-disabled","true")):b.$prevArrow.add(b.$nextArrow).addClass("slick-hidden").attr({"aria-disabled":"true",tabindex:"-1"}))},b.prototype.buildDots=function(){var c,d,b=this;if(b.options.dots===!0&&b.slideCount>b.options.slidesToShow){for(b.$slider.addClass("slick-dotted"),d=a("<ul />").addClass(b.options.dotsClass),c=0;c<=b.getDotCount();c+=1)d.append(a("<li />").append(b.options.customPaging.call(this,b,c)));b.$dots=d.appendTo(b.options.appendDots),b.$dots.find("li").first().addClass("slick-active").attr("aria-hidden","false")}},b.prototype.buildOut=function(){var b=this;b.$slides=b.$slider.children(b.options.slide+":not(.slick-cloned)").addClass("slick-slide"),b.slideCount=b.$slides.length,b.$slides.each(function(b,c){a(c).attr("data-slick-index",b).data("originalStyling",a(c).attr("style")||"")}),b.$slider.addClass("slick-slider"),b.$slideTrack=0===b.slideCount?a('<div class="slick-track"/>').appendTo(b.$slider):b.$slides.wrapAll('<div class="slick-track"/>').parent(),b.$list=b.$slideTrack.wrap('<div aria-live="polite" class="slick-list"/>').parent(),b.$slideTrack.css("opacity",0),(b.options.centerMode===!0||b.options.swipeToSlide===!0)&&(b.options.slidesToScroll=1),a("img[data-lazy]",b.$slider).not("[src]").addClass("slick-loading"),b.setupInfinite(),b.buildArrows(),b.buildDots(),b.updateDots(),b.setSlideClasses("number"==typeof b.currentSlide?b.currentSlide:0),b.options.draggable===!0&&b.$list.addClass("draggable")},b.prototype.buildRows=function(){var b,c,d,e,f,g,h,a=this;if(e=document.createDocumentFragment(),g=a.$slider.children(),a.options.rows>1){for(h=a.options.slidesPerRow*a.options.rows,f=Math.ceil(g.length/h),b=0;f>b;b++){var i=document.createElement("div");for(c=0;c<a.options.rows;c++){var j=document.createElement("div");for(d=0;d<a.options.slidesPerRow;d++){var k=b*h+(c*a.options.slidesPerRow+d);g.get(k)&&j.appendChild(g.get(k))}i.appendChild(j)}e.appendChild(i)}a.$slider.empty().append(e),a.$slider.children().children().children().css({width:100/a.options.slidesPerRow+"%",display:"inline-block"})}},b.prototype.checkResponsive=function(b,c){var e,f,g,d=this,h=!1,i=d.$slider.width(),j=window.innerWidth||a(window).width();if("window"===d.respondTo?g=j:"slider"===d.respondTo?g=i:"min"===d.respondTo&&(g=Math.min(j,i)),d.options.responsive&&d.options.responsive.length&&null!==d.options.responsive){f=null;for(e in d.breakpoints)d.breakpoints.hasOwnProperty(e)&&(d.originalSettings.mobileFirst===!1?g<d.breakpoints[e]&&(f=d.breakpoints[e]):g>d.breakpoints[e]&&(f=d.breakpoints[e]));null!==f?null!==d.activeBreakpoint?(f!==d.activeBreakpoint||c)&&(d.activeBreakpoint=f,"unslick"===d.breakpointSettings[f]?d.unslick(f):(d.options=a.extend({},d.originalSettings,d.breakpointSettings[f]),b===!0&&(d.currentSlide=d.options.initialSlide),d.refresh(b)),h=f):(d.activeBreakpoint=f,"unslick"===d.breakpointSettings[f]?d.unslick(f):(d.options=a.extend({},d.originalSettings,d.breakpointSettings[f]),b===!0&&(d.currentSlide=d.options.initialSlide),d.refresh(b)),h=f):null!==d.activeBreakpoint&&(d.activeBreakpoint=null,d.options=d.originalSettings,b===!0&&(d.currentSlide=d.options.initialSlide),d.refresh(b),h=f),b||h===!1||d.$slider.trigger("breakpoint",[d,h])}},b.prototype.changeSlide=function(b,c){var f,g,h,d=this,e=a(b.currentTarget);switch(e.is("a")&&b.preventDefault(),e.is("li")||(e=e.closest("li")),h=d.slideCount%d.options.slidesToScroll!==0,f=h?0:(d.slideCount-d.currentSlide)%d.options.slidesToScroll,b.data.message){case"previous":g=0===f?d.options.slidesToScroll:d.options.slidesToShow-f,d.slideCount>d.options.slidesToShow&&d.slideHandler(d.currentSlide-g,!1,c);break;case"next":g=0===f?d.options.slidesToScroll:f,d.slideCount>d.options.slidesToShow&&d.slideHandler(d.currentSlide+g,!1,c);break;case"index":var i=0===b.data.index?0:b.data.index||e.index()*d.options.slidesToScroll;d.slideHandler(d.checkNavigable(i),!1,c),e.children().trigger("focus");break;default:return}},b.prototype.checkNavigable=function(a){var c,d,b=this;if(c=b.getNavigableIndexes(),d=0,a>c[c.length-1])a=c[c.length-1];else for(var e in c){if(a<c[e]){a=d;break}d=c[e]}return a},b.prototype.cleanUpEvents=function(){var b=this;b.options.dots&&null!==b.$dots&&a("li",b.$dots).off("click.slick",b.changeSlide).off("mouseenter.slick",a.proxy(b.interrupt,b,!0)).off("mouseleave.slick",a.proxy(b.interrupt,b,!1)),b.$slider.off("focus.slick blur.slick"),b.options.arrows===!0&&b.slideCount>b.options.slidesToShow&&(b.$prevArrow&&b.$prevArrow.off("click.slick",b.changeSlide),b.$nextArrow&&b.$nextArrow.off("click.slick",b.changeSlide)),b.$list.off("touchstart.slick mousedown.slick",b.swipeHandler),b.$list.off("touchmove.slick mousemove.slick",b.swipeHandler),b.$list.off("touchend.slick mouseup.slick",b.swipeHandler),b.$list.off("touchcancel.slick mouseleave.slick",b.swipeHandler),b.$list.off("click.slick",b.clickHandler),a(document).off(b.visibilityChange,b.visibility),b.cleanUpSlideEvents(),b.options.accessibility===!0&&b.$list.off("keydown.slick",b.keyHandler),b.options.focusOnSelect===!0&&a(b.$slideTrack).children().off("click.slick",b.selectHandler),a(window).off("orientationchange.slick.slick-"+b.instanceUid,b.orientationChange),a(window).off("resize.slick.slick-"+b.instanceUid,b.resize),a("[draggable!=true]",b.$slideTrack).off("dragstart",b.preventDefault),a(window).off("load.slick.slick-"+b.instanceUid,b.setPosition),a(document).off("ready.slick.slick-"+b.instanceUid,b.setPosition)},b.prototype.cleanUpSlideEvents=function(){var b=this;b.$list.off("mouseenter.slick",a.proxy(b.interrupt,b,!0)),b.$list.off("mouseleave.slick",a.proxy(b.interrupt,b,!1))},b.prototype.cleanUpRows=function(){var b,a=this;a.options.rows>1&&(b=a.$slides.children().children(),b.removeAttr("style"),a.$slider.empty().append(b))},b.prototype.clickHandler=function(a){var b=this;b.shouldClick===!1&&(a.stopImmediatePropagation(),a.stopPropagation(),a.preventDefault())},b.prototype.destroy=function(b){var c=this;c.autoPlayClear(),c.touchObject={},c.cleanUpEvents(),a(".slick-cloned",c.$slider).detach(),c.$dots&&c.$dots.remove(),c.$prevArrow&&c.$prevArrow.length&&(c.$prevArrow.removeClass("slick-disabled slick-arrow slick-hidden").removeAttr("aria-hidden aria-disabled tabindex").css("display",""),c.htmlExpr.test(c.options.prevArrow)&&c.$prevArrow.remove()),c.$nextArrow&&c.$nextArrow.length&&(c.$nextArrow.removeClass("slick-disabled slick-arrow slick-hidden").removeAttr("aria-hidden aria-disabled tabindex").css("display",""),c.htmlExpr.test(c.options.nextArrow)&&c.$nextArrow.remove()),c.$slides&&(c.$slides.removeClass("slick-slide slick-active slick-center slick-visible slick-current").removeAttr("aria-hidden").removeAttr("data-slick-index").each(function(){a(this).attr("style",a(this).data("originalStyling"))}),c.$slideTrack.children(this.options.slide).detach(),c.$slideTrack.detach(),c.$list.detach(),c.$slider.append(c.$slides)),c.cleanUpRows(),c.$slider.removeClass("slick-slider"),c.$slider.removeClass("slick-initialized"),c.$slider.removeClass("slick-dotted"),c.unslicked=!0,b||c.$slider.trigger("destroy",[c])},b.prototype.disableTransition=function(a){var b=this,c={};c[b.transitionType]="",b.options.fade===!1?b.$slideTrack.css(c):b.$slides.eq(a).css(c)},b.prototype.fadeSlide=function(a,b){var c=this;c.cssTransitions===!1?(c.$slides.eq(a).css({zIndex:c.options.zIndex}),c.$slides.eq(a).animate({opacity:1},c.options.speed,c.options.easing,b)):(c.applyTransition(a),c.$slides.eq(a).css({opacity:1,zIndex:c.options.zIndex}),b&&setTimeout(function(){c.disableTransition(a),b.call()},c.options.speed))},b.prototype.fadeSlideOut=function(a){var b=this;b.cssTransitions===!1?b.$slides.eq(a).animate({opacity:0,zIndex:b.options.zIndex-2},b.options.speed,b.options.easing):(b.applyTransition(a),b.$slides.eq(a).css({opacity:0,zIndex:b.options.zIndex-2}))},b.prototype.filterSlides=b.prototype.slickFilter=function(a){var b=this;null!==a&&(b.$slidesCache=b.$slides,b.unload(),b.$slideTrack.children(this.options.slide).detach(),b.$slidesCache.filter(a).appendTo(b.$slideTrack),b.reinit())},b.prototype.focusHandler=function(){var b=this;b.$slider.off("focus.slick blur.slick").on("focus.slick blur.slick","*:not(.slick-arrow)",function(c){c.stopImmediatePropagation();var d=a(this);setTimeout(function(){b.options.pauseOnFocus&&(b.focussed=d.is(":focus"),b.autoPlay())},0)})},b.prototype.getCurrent=b.prototype.slickCurrentSlide=function(){var a=this;return a.currentSlide},b.prototype.getDotCount=function(){var a=this,b=0,c=0,d=0;if(a.options.infinite===!0)for(;b<a.slideCount;)++d,b=c+a.options.slidesToScroll,c+=a.options.slidesToScroll<=a.options.slidesToShow?a.options.slidesToScroll:a.options.slidesToShow;else if(a.options.centerMode===!0)d=a.slideCount;else if(a.options.asNavFor)for(;b<a.slideCount;)++d,b=c+a.options.slidesToScroll,c+=a.options.slidesToScroll<=a.options.slidesToShow?a.options.slidesToScroll:a.options.slidesToShow;else d=1+Math.ceil((a.slideCount-a.options.slidesToShow)/a.options.slidesToScroll);return d-1},b.prototype.getLeft=function(a){var c,d,f,b=this,e=0;return b.slideOffset=0,d=b.$slides.first().outerHeight(!0),b.options.infinite===!0?(b.slideCount>b.options.slidesToShow&&(b.slideOffset=b.slideWidth*b.options.slidesToShow*-1,e=d*b.options.slidesToShow*-1),b.slideCount%b.options.slidesToScroll!==0&&a+b.options.slidesToScroll>b.slideCount&&b.slideCount>b.options.slidesToShow&&(a>b.slideCount?(b.slideOffset=(b.options.slidesToShow-(a-b.slideCount))*b.slideWidth*-1,e=(b.options.slidesToShow-(a-b.slideCount))*d*-1):(b.slideOffset=b.slideCount%b.options.slidesToScroll*b.slideWidth*-1,e=b.slideCount%b.options.slidesToScroll*d*-1))):a+b.options.slidesToShow>b.slideCount&&(b.slideOffset=(a+b.options.slidesToShow-b.slideCount)*b.slideWidth,e=(a+b.options.slidesToShow-b.slideCount)*d),b.slideCount<=b.options.slidesToShow&&(b.slideOffset=0,e=0),b.options.centerMode===!0&&b.options.infinite===!0?b.slideOffset+=b.slideWidth*Math.floor(b.options.slidesToShow/2)-b.slideWidth:b.options.centerMode===!0&&(b.slideOffset=0,b.slideOffset+=b.slideWidth*Math.floor(b.options.slidesToShow/2)),c=b.options.vertical===!1?a*b.slideWidth*-1+b.slideOffset:a*d*-1+e,b.options.variableWidth===!0&&(f=b.slideCount<=b.options.slidesToShow||b.options.infinite===!1?b.$slideTrack.children(".slick-slide").eq(a):b.$slideTrack.children(".slick-slide").eq(a+b.options.slidesToShow),c=b.options.rtl===!0?f[0]?-1*(b.$slideTrack.width()-f[0].offsetLeft-f.width()):0:f[0]?-1*f[0].offsetLeft:0,b.options.centerMode===!0&&(f=b.slideCount<=b.options.slidesToShow||b.options.infinite===!1?b.$slideTrack.children(".slick-slide").eq(a):b.$slideTrack.children(".slick-slide").eq(a+b.options.slidesToShow+1),c=b.options.rtl===!0?f[0]?-1*(b.$slideTrack.width()-f[0].offsetLeft-f.width()):0:f[0]?-1*f[0].offsetLeft:0,c+=(b.$list.width()-f.outerWidth())/2)),c},b.prototype.getOption=b.prototype.slickGetOption=function(a){var b=this;return b.options[a]},b.prototype.getNavigableIndexes=function(){var e,a=this,b=0,c=0,d=[];for(a.options.infinite===!1?e=a.slideCount:(b=-1*a.options.slidesToScroll,c=-1*a.options.slidesToScroll,e=2*a.slideCount);e>b;)d.push(b),b=c+a.options.slidesToScroll,c+=a.options.slidesToScroll<=a.options.slidesToShow?a.options.slidesToScroll:a.options.slidesToShow;return d},b.prototype.getSlick=function(){return this},b.prototype.getSlideCount=function(){var c,d,e,b=this;return e=b.options.centerMode===!0?b.slideWidth*Math.floor(b.options.slidesToShow/2):0,b.options.swipeToSlide===!0?(b.$slideTrack.find(".slick-slide").each(function(c,f){return f.offsetLeft-e+a(f).outerWidth()/2>-1*b.swipeLeft?(d=f,!1):void 0}),c=Math.abs(a(d).attr("data-slick-index")-b.currentSlide)||1):b.options.slidesToScroll},b.prototype.goTo=b.prototype.slickGoTo=function(a,b){var c=this;c.changeSlide({data:{message:"index",index:parseInt(a)}},b)},b.prototype.init=function(b){var c=this;a(c.$slider).hasClass("slick-initialized")||(a(c.$slider).addClass("slick-initialized"),c.buildRows(),c.buildOut(),c.setProps(),c.startLoad(),c.loadSlider(),c.initializeEvents(),c.updateArrows(),c.updateDots(),c.checkResponsive(!0),c.focusHandler()),b&&c.$slider.trigger("init",[c]),c.options.accessibility===!0&&c.initADA(),c.options.autoplay&&(c.paused=!1,c.autoPlay())},b.prototype.initADA=function(){var b=this;b.$slides.add(b.$slideTrack.find(".slick-cloned")).attr({"aria-hidden":"true",tabindex:"-1"}).find("a, input, button, select").attr({tabindex:"-1"}),b.$slideTrack.attr("role","listbox"),b.$slides.not(b.$slideTrack.find(".slick-cloned")).each(function(c){a(this).attr({role:"option","aria-describedby":"slick-slide"+b.instanceUid+c})}),null!==b.$dots&&b.$dots.attr("role","tablist").find("li").each(function(c){a(this).attr({role:"presentation","aria-selected":"false","aria-controls":"navigation"+b.instanceUid+c,id:"slick-slide"+b.instanceUid+c})}).first().attr("aria-selected","true").end().find("button").attr("role","button").end().closest("div").attr("role","toolbar"),b.activateADA()},b.prototype.initArrowEvents=function(){var a=this;a.options.arrows===!0&&a.slideCount>a.options.slidesToShow&&(a.$prevArrow.off("click.slick").on("click.slick",{message:"previous"},a.changeSlide),a.$nextArrow.off("click.slick").on("click.slick",{message:"next"},a.changeSlide))},b.prototype.initDotEvents=function(){var b=this;b.options.dots===!0&&b.slideCount>b.options.slidesToShow&&a("li",b.$dots).on("click.slick",{message:"index"},b.changeSlide),b.options.dots===!0&&b.options.pauseOnDotsHover===!0&&a("li",b.$dots).on("mouseenter.slick",a.proxy(b.interrupt,b,!0)).on("mouseleave.slick",a.proxy(b.interrupt,b,!1))},b.prototype.initSlideEvents=function(){var b=this;b.options.pauseOnHover&&(b.$list.on("mouseenter.slick",a.proxy(b.interrupt,b,!0)),b.$list.on("mouseleave.slick",a.proxy(b.interrupt,b,!1)))},b.prototype.initializeEvents=function(){var b=this;b.initArrowEvents(),b.initDotEvents(),b.initSlideEvents(),b.$list.on("touchstart.slick mousedown.slick",{action:"start"},b.swipeHandler),b.$list.on("touchmove.slick mousemove.slick",{action:"move"},b.swipeHandler),b.$list.on("touchend.slick mouseup.slick",{action:"end"},b.swipeHandler),b.$list.on("touchcancel.slick mouseleave.slick",{action:"end"},b.swipeHandler),b.$list.on("click.slick",b.clickHandler),a(document).on(b.visibilityChange,a.proxy(b.visibility,b)),b.options.accessibility===!0&&b.$list.on("keydown.slick",b.keyHandler),b.options.focusOnSelect===!0&&a(b.$slideTrack).children().on("click.slick",b.selectHandler),a(window).on("orientationchange.slick.slick-"+b.instanceUid,a.proxy(b.orientationChange,b)),a(window).on("resize.slick.slick-"+b.instanceUid,a.proxy(b.resize,b)),a("[draggable!=true]",b.$slideTrack).on("dragstart",b.preventDefault),a(window).on("load.slick.slick-"+b.instanceUid,b.setPosition),a(document).on("ready.slick.slick-"+b.instanceUid,b.setPosition)},b.prototype.initUI=function(){var a=this;a.options.arrows===!0&&a.slideCount>a.options.slidesToShow&&(a.$prevArrow.show(),a.$nextArrow.show()),a.options.dots===!0&&a.slideCount>a.options.slidesToShow&&a.$dots.show()},b.prototype.keyHandler=function(a){var b=this;a.target.tagName.match("TEXTAREA|INPUT|SELECT")||(37===a.keyCode&&b.options.accessibility===!0?b.changeSlide({data:{message:b.options.rtl===!0?"next":"previous"}}):39===a.keyCode&&b.options.accessibility===!0&&b.changeSlide({data:{message:b.options.rtl===!0?"previous":"next"}}))},b.prototype.lazyLoad=function(){function g(c){a("img[data-lazy]",c).each(function(){var c=a(this),d=a(this).attr("data-lazy"),e=document.createElement("img");e.onload=function(){c.animate({opacity:0},100,function(){c.attr("src",d).animate({opacity:1},200,function(){c.removeAttr("data-lazy").removeClass("slick-loading")}),b.$slider.trigger("lazyLoaded",[b,c,d])})},e.onerror=function(){c.removeAttr("data-lazy").removeClass("slick-loading").addClass("slick-lazyload-error"),b.$slider.trigger("lazyLoadError",[b,c,d])},e.src=d})}var c,d,e,f,b=this;b.options.centerMode===!0?b.options.infinite===!0?(e=b.currentSlide+(b.options.slidesToShow/2+1),f=e+b.options.slidesToShow+2):(e=Math.max(0,b.currentSlide-(b.options.slidesToShow/2+1)),f=2+(b.options.slidesToShow/2+1)+b.currentSlide):(e=b.options.infinite?b.options.slidesToShow+b.currentSlide:b.currentSlide,f=Math.ceil(e+b.options.slidesToShow),b.options.fade===!0&&(e>0&&e--,f<=b.slideCount&&f++)),c=b.$slider.find(".slick-slide").slice(e,f),g(c),b.slideCount<=b.options.slidesToShow?(d=b.$slider.find(".slick-slide"),g(d)):b.currentSlide>=b.slideCount-b.options.slidesToShow?(d=b.$slider.find(".slick-cloned").slice(0,b.options.slidesToShow),g(d)):0===b.currentSlide&&(d=b.$slider.find(".slick-cloned").slice(-1*b.options.slidesToShow),g(d))},b.prototype.loadSlider=function(){var a=this;a.setPosition(),a.$slideTrack.css({opacity:1}),a.$slider.removeClass("slick-loading"),a.initUI(),"progressive"===a.options.lazyLoad&&a.progressiveLazyLoad()},b.prototype.next=b.prototype.slickNext=function(){var a=this;a.changeSlide({data:{message:"next"}})},b.prototype.orientationChange=function(){var a=this;a.checkResponsive(),a.setPosition()},b.prototype.pause=b.prototype.slickPause=function(){var a=this;a.autoPlayClear(),a.paused=!0},b.prototype.play=b.prototype.slickPlay=function(){var a=this;a.autoPlay(),a.options.autoplay=!0,a.paused=!1,a.focussed=!1,a.interrupted=!1},b.prototype.postSlide=function(a){var b=this;b.unslicked||(b.$slider.trigger("afterChange",[b,a]),b.animating=!1,b.setPosition(),b.swipeLeft=null,b.options.autoplay&&b.autoPlay(),b.options.accessibility===!0&&b.initADA())},b.prototype.prev=b.prototype.slickPrev=function(){var a=this;a.changeSlide({data:{message:"previous"}})},b.prototype.preventDefault=function(a){a.preventDefault()},b.prototype.progressiveLazyLoad=function(b){b=b||1;var e,f,g,c=this,d=a("img[data-lazy]",c.$slider);d.length?(e=d.first(),f=e.attr("data-lazy"),g=document.createElement("img"),g.onload=function(){e.attr("src",f).removeAttr("data-lazy").removeClass("slick-loading"),c.options.adaptiveHeight===!0&&c.setPosition(),c.$slider.trigger("lazyLoaded",[c,e,f]),c.progressiveLazyLoad()},g.onerror=function(){3>b?setTimeout(function(){c.progressiveLazyLoad(b+1)},500):(e.removeAttr("data-lazy").removeClass("slick-loading").addClass("slick-lazyload-error"),c.$slider.trigger("lazyLoadError",[c,e,f]),c.progressiveLazyLoad())},g.src=f):c.$slider.trigger("allImagesLoaded",[c])},b.prototype.refresh=function(b){var d,e,c=this;e=c.slideCount-c.options.slidesToShow,!c.options.infinite&&c.currentSlide>e&&(c.currentSlide=e),c.slideCount<=c.options.slidesToShow&&(c.currentSlide=0),d=c.currentSlide,c.destroy(!0),a.extend(c,c.initials,{currentSlide:d}),c.init(),b||c.changeSlide({data:{message:"index",index:d}},!1)},b.prototype.registerBreakpoints=function(){var c,d,e,b=this,f=b.options.responsive||null;if("array"===a.type(f)&&f.length){b.respondTo=b.options.respondTo||"window";for(c in f)if(e=b.breakpoints.length-1,d=f[c].breakpoint,f.hasOwnProperty(c)){for(;e>=0;)b.breakpoints[e]&&b.breakpoints[e]===d&&b.breakpoints.splice(e,1),e--;b.breakpoints.push(d),b.breakpointSettings[d]=f[c].settings}b.breakpoints.sort(function(a,c){return b.options.mobileFirst?a-c:c-a})}},b.prototype.reinit=function(){var b=this;b.$slides=b.$slideTrack.children(b.options.slide).addClass("slick-slide"),b.slideCount=b.$slides.length,b.currentSlide>=b.slideCount&&0!==b.currentSlide&&(b.currentSlide=b.currentSlide-b.options.slidesToScroll),b.slideCount<=b.options.slidesToShow&&(b.currentSlide=0),b.registerBreakpoints(),b.setProps(),b.setupInfinite(),b.buildArrows(),b.updateArrows(),b.initArrowEvents(),b.buildDots(),b.updateDots(),b.initDotEvents(),b.cleanUpSlideEvents(),b.initSlideEvents(),b.checkResponsive(!1,!0),b.options.focusOnSelect===!0&&a(b.$slideTrack).children().on("click.slick",b.selectHandler),b.setSlideClasses("number"==typeof b.currentSlide?b.currentSlide:0),b.setPosition(),b.focusHandler(),b.paused=!b.options.autoplay,b.autoPlay(),b.$slider.trigger("reInit",[b])},b.prototype.resize=function(){var b=this;a(window).width()!==b.windowWidth&&(clearTimeout(b.windowDelay),b.windowDelay=window.setTimeout(function(){b.windowWidth=a(window).width(),b.checkResponsive(),b.unslicked||b.setPosition()},50))},b.prototype.removeSlide=b.prototype.slickRemove=function(a,b,c){var d=this;return"boolean"==typeof a?(b=a,a=b===!0?0:d.slideCount-1):a=b===!0?--a:a,d.slideCount<1||0>a||a>d.slideCount-1?!1:(d.unload(),c===!0?d.$slideTrack.children().remove():d.$slideTrack.children(this.options.slide).eq(a).remove(),d.$slides=d.$slideTrack.children(this.options.slide),d.$slideTrack.children(this.options.slide).detach(),d.$slideTrack.append(d.$slides),d.$slidesCache=d.$slides,void d.reinit())},b.prototype.setCSS=function(a){var d,e,b=this,c={};b.options.rtl===!0&&(a=-a),d="left"==b.positionProp?Math.ceil(a)+"px":"0px",e="top"==b.positionProp?Math.ceil(a)+"px":"0px",c[b.positionProp]=a,b.transformsEnabled===!1?b.$slideTrack.css(c):(c={},b.cssTransitions===!1?(c[b.animType]="translate("+d+", "+e+")",b.$slideTrack.css(c)):(c[b.animType]="translate3d("+d+", "+e+", 0px)",b.$slideTrack.css(c)))},b.prototype.setDimensions=function(){var a=this;a.options.vertical===!1?a.options.centerMode===!0&&a.$list.css({padding:"0px "+a.options.centerPadding}):(a.$list.height(a.$slides.first().outerHeight(!0)*a.options.slidesToShow),a.options.centerMode===!0&&a.$list.css({padding:a.options.centerPadding+" 0px"})),a.listWidth=a.$list.width(),a.listHeight=a.$list.height(),a.options.vertical===!1&&a.options.variableWidth===!1?(a.slideWidth=Math.ceil(a.listWidth/a.options.slidesToShow),a.$slideTrack.width(Math.ceil(a.slideWidth*a.$slideTrack.children(".slick-slide").length))):a.options.variableWidth===!0?a.$slideTrack.width(5e3*a.slideCount):(a.slideWidth=Math.ceil(a.listWidth),a.$slideTrack.height(Math.ceil(a.$slides.first().outerHeight(!0)*a.$slideTrack.children(".slick-slide").length)));var b=a.$slides.first().outerWidth(!0)-a.$slides.first().width();a.options.variableWidth===!1&&a.$slideTrack.children(".slick-slide").width(a.slideWidth-b)},b.prototype.setFade=function(){var c,b=this;b.$slides.each(function(d,e){c=b.slideWidth*d*-1,b.options.rtl===!0?a(e).css({position:"relative",right:c,top:0,zIndex:b.options.zIndex-2,opacity:0}):a(e).css({position:"relative",left:c,top:0,zIndex:b.options.zIndex-2,opacity:0})}),b.$slides.eq(b.currentSlide).css({zIndex:b.options.zIndex-1,opacity:1})},b.prototype.setHeight=function(){var a=this;if(1===a.options.slidesToShow&&a.options.adaptiveHeight===!0&&a.options.vertical===!1){var b=a.$slides.eq(a.currentSlide).outerHeight(!0);a.$list.css("height",b)}},b.prototype.setOption=b.prototype.slickSetOption=function(){var c,d,e,f,h,b=this,g=!1;if("object"===a.type(arguments[0])?(e=arguments[0],g=arguments[1],h="multiple"):"string"===a.type(arguments[0])&&(e=arguments[0],f=arguments[1],g=arguments[2],"responsive"===arguments[0]&&"array"===a.type(arguments[1])?h="responsive":"undefined"!=typeof arguments[1]&&(h="single")),"single"===h)b.options[e]=f;else if("multiple"===h)a.each(e,function(a,c){b.options[a]=c});else if("responsive"===h)for(d in f)if("array"!==a.type(b.options.responsive))b.options.responsive=[f[d]];else{for(c=b.options.responsive.length-1;c>=0;)b.options.responsive[c].breakpoint===f[d].breakpoint&&b.options.responsive.splice(c,1),c--;b.options.responsive.push(f[d])}g&&(b.unload(),b.reinit())},b.prototype.setPosition=function(){var a=this;a.setDimensions(),a.setHeight(),a.options.fade===!1?a.setCSS(a.getLeft(a.currentSlide)):a.setFade(),a.$slider.trigger("setPosition",[a])},b.prototype.setProps=function(){var a=this,b=document.body.style;a.positionProp=a.options.vertical===!0?"top":"left","top"===a.positionProp?a.$slider.addClass("slick-vertical"):a.$slider.removeClass("slick-vertical"),(void 0!==b.WebkitTransition||void 0!==b.MozTransition||void 0!==b.msTransition)&&a.options.useCSS===!0&&(a.cssTransitions=!0),a.options.fade&&("number"==typeof a.options.zIndex?a.options.zIndex<3&&(a.options.zIndex=3):a.options.zIndex=a.defaults.zIndex),void 0!==b.OTransform&&(a.animType="OTransform",a.transformType="-o-transform",a.transitionType="OTransition",void 0===b.perspectiveProperty&&void 0===b.webkitPerspective&&(a.animType=!1)),void 0!==b.MozTransform&&(a.animType="MozTransform",a.transformType="-moz-transform",a.transitionType="MozTransition",void 0===b.perspectiveProperty&&void 0===b.MozPerspective&&(a.animType=!1)),void 0!==b.webkitTransform&&(a.animType="webkitTransform",a.transformType="-webkit-transform",a.transitionType="webkitTransition",void 0===b.perspectiveProperty&&void 0===b.webkitPerspective&&(a.animType=!1)),void 0!==b.msTransform&&(a.animType="msTransform",a.transformType="-ms-transform",a.transitionType="msTransition",void 0===b.msTransform&&(a.animType=!1)),void 0!==b.transform&&a.animType!==!1&&(a.animType="transform",a.transformType="transform",a.transitionType="transition"),a.transformsEnabled=a.options.useTransform&&null!==a.animType&&a.animType!==!1},b.prototype.setSlideClasses=function(a){var c,d,e,f,b=this;d=b.$slider.find(".slick-slide").removeClass("slick-active slick-center slick-current").attr("aria-hidden","true"),b.$slides.eq(a).addClass("slick-current"),b.options.centerMode===!0?(c=Math.floor(b.options.slidesToShow/2),b.options.infinite===!0&&(a>=c&&a<=b.slideCount-1-c?b.$slides.slice(a-c,a+c+1).addClass("slick-active").attr("aria-hidden","false"):(e=b.options.slidesToShow+a,
+d.slice(e-c+1,e+c+2).addClass("slick-active").attr("aria-hidden","false")),0===a?d.eq(d.length-1-b.options.slidesToShow).addClass("slick-center"):a===b.slideCount-1&&d.eq(b.options.slidesToShow).addClass("slick-center")),b.$slides.eq(a).addClass("slick-center")):a>=0&&a<=b.slideCount-b.options.slidesToShow?b.$slides.slice(a,a+b.options.slidesToShow).addClass("slick-active").attr("aria-hidden","false"):d.length<=b.options.slidesToShow?d.addClass("slick-active").attr("aria-hidden","false"):(f=b.slideCount%b.options.slidesToShow,e=b.options.infinite===!0?b.options.slidesToShow+a:a,b.options.slidesToShow==b.options.slidesToScroll&&b.slideCount-a<b.options.slidesToShow?d.slice(e-(b.options.slidesToShow-f),e+f).addClass("slick-active").attr("aria-hidden","false"):d.slice(e,e+b.options.slidesToShow).addClass("slick-active").attr("aria-hidden","false")),"ondemand"===b.options.lazyLoad&&b.lazyLoad()},b.prototype.setupInfinite=function(){var c,d,e,b=this;if(b.options.fade===!0&&(b.options.centerMode=!1),b.options.infinite===!0&&b.options.fade===!1&&(d=null,b.slideCount>b.options.slidesToShow)){for(e=b.options.centerMode===!0?b.options.slidesToShow+1:b.options.slidesToShow,c=b.slideCount;c>b.slideCount-e;c-=1)d=c-1,a(b.$slides[d]).clone(!0).attr("id","").attr("data-slick-index",d-b.slideCount).prependTo(b.$slideTrack).addClass("slick-cloned");for(c=0;e>c;c+=1)d=c,a(b.$slides[d]).clone(!0).attr("id","").attr("data-slick-index",d+b.slideCount).appendTo(b.$slideTrack).addClass("slick-cloned");b.$slideTrack.find(".slick-cloned").find("[id]").each(function(){a(this).attr("id","")})}},b.prototype.interrupt=function(a){var b=this;a||b.autoPlay(),b.interrupted=a},b.prototype.selectHandler=function(b){var c=this,d=a(b.target).is(".slick-slide")?a(b.target):a(b.target).parents(".slick-slide"),e=parseInt(d.attr("data-slick-index"));return e||(e=0),c.slideCount<=c.options.slidesToShow?(c.setSlideClasses(e),void c.asNavFor(e)):void c.slideHandler(e)},b.prototype.slideHandler=function(a,b,c){var d,e,f,g,j,h=null,i=this;return b=b||!1,i.animating===!0&&i.options.waitForAnimate===!0||i.options.fade===!0&&i.currentSlide===a||i.slideCount<=i.options.slidesToShow?void 0:(b===!1&&i.asNavFor(a),d=a,h=i.getLeft(d),g=i.getLeft(i.currentSlide),i.currentLeft=null===i.swipeLeft?g:i.swipeLeft,i.options.infinite===!1&&i.options.centerMode===!1&&(0>a||a>i.getDotCount()*i.options.slidesToScroll)?void(i.options.fade===!1&&(d=i.currentSlide,c!==!0?i.animateSlide(g,function(){i.postSlide(d)}):i.postSlide(d))):i.options.infinite===!1&&i.options.centerMode===!0&&(0>a||a>i.slideCount-i.options.slidesToScroll)?void(i.options.fade===!1&&(d=i.currentSlide,c!==!0?i.animateSlide(g,function(){i.postSlide(d)}):i.postSlide(d))):(i.options.autoplay&&clearInterval(i.autoPlayTimer),e=0>d?i.slideCount%i.options.slidesToScroll!==0?i.slideCount-i.slideCount%i.options.slidesToScroll:i.slideCount+d:d>=i.slideCount?i.slideCount%i.options.slidesToScroll!==0?0:d-i.slideCount:d,i.animating=!0,i.$slider.trigger("beforeChange",[i,i.currentSlide,e]),f=i.currentSlide,i.currentSlide=e,i.setSlideClasses(i.currentSlide),i.options.asNavFor&&(j=i.getNavTarget(),j=j.slick("getSlick"),j.slideCount<=j.options.slidesToShow&&j.setSlideClasses(i.currentSlide)),i.updateDots(),i.updateArrows(),i.options.fade===!0?(c!==!0?(i.fadeSlideOut(f),i.fadeSlide(e,function(){i.postSlide(e)})):i.postSlide(e),void i.animateHeight()):void(c!==!0?i.animateSlide(h,function(){i.postSlide(e)}):i.postSlide(e))))},b.prototype.startLoad=function(){var a=this;a.options.arrows===!0&&a.slideCount>a.options.slidesToShow&&(a.$prevArrow.hide(),a.$nextArrow.hide()),a.options.dots===!0&&a.slideCount>a.options.slidesToShow&&a.$dots.hide(),a.$slider.addClass("slick-loading")},b.prototype.swipeDirection=function(){var a,b,c,d,e=this;return a=e.touchObject.startX-e.touchObject.curX,b=e.touchObject.startY-e.touchObject.curY,c=Math.atan2(b,a),d=Math.round(180*c/Math.PI),0>d&&(d=360-Math.abs(d)),45>=d&&d>=0?e.options.rtl===!1?"left":"right":360>=d&&d>=315?e.options.rtl===!1?"left":"right":d>=135&&225>=d?e.options.rtl===!1?"right":"left":e.options.verticalSwiping===!0?d>=35&&135>=d?"down":"up":"vertical"},b.prototype.swipeEnd=function(a){var c,d,b=this;if(b.dragging=!1,b.interrupted=!1,b.shouldClick=b.touchObject.swipeLength>10?!1:!0,void 0===b.touchObject.curX)return!1;if(b.touchObject.edgeHit===!0&&b.$slider.trigger("edge",[b,b.swipeDirection()]),b.touchObject.swipeLength>=b.touchObject.minSwipe){switch(d=b.swipeDirection()){case"left":case"down":c=b.options.swipeToSlide?b.checkNavigable(b.currentSlide+b.getSlideCount()):b.currentSlide+b.getSlideCount(),b.currentDirection=0;break;case"right":case"up":c=b.options.swipeToSlide?b.checkNavigable(b.currentSlide-b.getSlideCount()):b.currentSlide-b.getSlideCount(),b.currentDirection=1}"vertical"!=d&&(b.slideHandler(c),b.touchObject={},b.$slider.trigger("swipe",[b,d]))}else b.touchObject.startX!==b.touchObject.curX&&(b.slideHandler(b.currentSlide),b.touchObject={})},b.prototype.swipeHandler=function(a){var b=this;if(!(b.options.swipe===!1||"ontouchend"in document&&b.options.swipe===!1||b.options.draggable===!1&&-1!==a.type.indexOf("mouse")))switch(b.touchObject.fingerCount=a.originalEvent&&void 0!==a.originalEvent.touches?a.originalEvent.touches.length:1,b.touchObject.minSwipe=b.listWidth/b.options.touchThreshold,b.options.verticalSwiping===!0&&(b.touchObject.minSwipe=b.listHeight/b.options.touchThreshold),a.data.action){case"start":b.swipeStart(a);break;case"move":b.swipeMove(a);break;case"end":b.swipeEnd(a)}},b.prototype.swipeMove=function(a){var d,e,f,g,h,b=this;return h=void 0!==a.originalEvent?a.originalEvent.touches:null,!b.dragging||h&&1!==h.length?!1:(d=b.getLeft(b.currentSlide),b.touchObject.curX=void 0!==h?h[0].pageX:a.clientX,b.touchObject.curY=void 0!==h?h[0].pageY:a.clientY,b.touchObject.swipeLength=Math.round(Math.sqrt(Math.pow(b.touchObject.curX-b.touchObject.startX,2))),b.options.verticalSwiping===!0&&(b.touchObject.swipeLength=Math.round(Math.sqrt(Math.pow(b.touchObject.curY-b.touchObject.startY,2)))),e=b.swipeDirection(),"vertical"!==e?(void 0!==a.originalEvent&&b.touchObject.swipeLength>4&&a.preventDefault(),g=(b.options.rtl===!1?1:-1)*(b.touchObject.curX>b.touchObject.startX?1:-1),b.options.verticalSwiping===!0&&(g=b.touchObject.curY>b.touchObject.startY?1:-1),f=b.touchObject.swipeLength,b.touchObject.edgeHit=!1,b.options.infinite===!1&&(0===b.currentSlide&&"right"===e||b.currentSlide>=b.getDotCount()&&"left"===e)&&(f=b.touchObject.swipeLength*b.options.edgeFriction,b.touchObject.edgeHit=!0),b.options.vertical===!1?b.swipeLeft=d+f*g:b.swipeLeft=d+f*(b.$list.height()/b.listWidth)*g,b.options.verticalSwiping===!0&&(b.swipeLeft=d+f*g),b.options.fade===!0||b.options.touchMove===!1?!1:b.animating===!0?(b.swipeLeft=null,!1):void b.setCSS(b.swipeLeft)):void 0)},b.prototype.swipeStart=function(a){var c,b=this;return b.interrupted=!0,1!==b.touchObject.fingerCount||b.slideCount<=b.options.slidesToShow?(b.touchObject={},!1):(void 0!==a.originalEvent&&void 0!==a.originalEvent.touches&&(c=a.originalEvent.touches[0]),b.touchObject.startX=b.touchObject.curX=void 0!==c?c.pageX:a.clientX,b.touchObject.startY=b.touchObject.curY=void 0!==c?c.pageY:a.clientY,void(b.dragging=!0))},b.prototype.unfilterSlides=b.prototype.slickUnfilter=function(){var a=this;null!==a.$slidesCache&&(a.unload(),a.$slideTrack.children(this.options.slide).detach(),a.$slidesCache.appendTo(a.$slideTrack),a.reinit())},b.prototype.unload=function(){var b=this;a(".slick-cloned",b.$slider).remove(),b.$dots&&b.$dots.remove(),b.$prevArrow&&b.htmlExpr.test(b.options.prevArrow)&&b.$prevArrow.remove(),b.$nextArrow&&b.htmlExpr.test(b.options.nextArrow)&&b.$nextArrow.remove(),b.$slides.removeClass("slick-slide slick-active slick-visible slick-current").attr("aria-hidden","true").css("width","")},b.prototype.unslick=function(a){var b=this;b.$slider.trigger("unslick",[b,a]),b.destroy()},b.prototype.updateArrows=function(){var b,a=this;b=Math.floor(a.options.slidesToShow/2),a.options.arrows===!0&&a.slideCount>a.options.slidesToShow&&!a.options.infinite&&(a.$prevArrow.removeClass("slick-disabled").attr("aria-disabled","false"),a.$nextArrow.removeClass("slick-disabled").attr("aria-disabled","false"),0===a.currentSlide?(a.$prevArrow.addClass("slick-disabled").attr("aria-disabled","true"),a.$nextArrow.removeClass("slick-disabled").attr("aria-disabled","false")):a.currentSlide>=a.slideCount-a.options.slidesToShow&&a.options.centerMode===!1?(a.$nextArrow.addClass("slick-disabled").attr("aria-disabled","true"),a.$prevArrow.removeClass("slick-disabled").attr("aria-disabled","false")):a.currentSlide>=a.slideCount-1&&a.options.centerMode===!0&&(a.$nextArrow.addClass("slick-disabled").attr("aria-disabled","true"),a.$prevArrow.removeClass("slick-disabled").attr("aria-disabled","false")))},b.prototype.updateDots=function(){var a=this;null!==a.$dots&&(a.$dots.find("li").removeClass("slick-active").attr("aria-hidden","true"),a.$dots.find("li").eq(Math.floor(a.currentSlide/a.options.slidesToScroll)).addClass("slick-active").attr("aria-hidden","false"))},b.prototype.visibility=function(){var a=this;a.options.autoplay&&(document[a.hidden]?a.interrupted=!0:a.interrupted=!1)},a.fn.slick=function(){var f,g,a=this,c=arguments[0],d=Array.prototype.slice.call(arguments,1),e=a.length;for(f=0;e>f;f++)if("object"==typeof c||"undefined"==typeof c?a[f].slick=new b(a[f],c):g=a[f].slick[c].apply(a[f].slick,d),"undefined"!=typeof g)return g;return a}});;
+this.fitie = function (node) {
+	// restrict to valid object-fit value
+	var objectFit = node.currentStyle['object-fit'];
+
+	if (!objectFit || !/^(contain|cover|fill)$/.test(objectFit)) return;
+
+	// prepare container styles
+	var outerWidth  = node.clientWidth;
+	var outerHeight = node.clientHeight;
+	var outerRatio  = outerWidth / outerHeight;
+
+	var name = node.nodeName.toLowerCase();
+
+	var setCSS = node.runtimeStyle;
+	var getCSS = node.currentStyle;
+
+	var addEventListener = node.addEventListener || node.attachEvent;
+	var removeEventListener = node.removeEventListener || node.detachEvent;
+	var on = node.addEventListener ? '' : 'on';
+	var img = name === 'img';
+	var type = img ? 'load' : 'loadedmetadata';
+
+	addEventListener.call(node, on + type, onload);
+
+	if (node.complete) onload();
+
+	function onload() {
+		removeEventListener.call(node, on + type, onload);
+
+		// prepare container styles
+		var imgCSS = {
+			boxSizing: 'content-box',
+			display:   'inline-block',
+			overflow:  'hidden'
+		};
+
+		'backgroundColor backgroundImage borderColor borderStyle borderWidth bottom fontSize lineHeight height left opacity margin position right top visibility width'.replace(/\w+/g, function (key) {
+			imgCSS[key] = getCSS[key];
+		});
+
+		// prepare image styles
+		setCSS.border = setCSS.margin = setCSS.padding = 0;
+		setCSS.display = 'block';
+		setCSS.height = setCSS.width = 'auto';
+		setCSS.opacity = 1;
+
+		var innerWidth  = node.videoWidth || node.width;
+		var innerHeight = node.videoHeight || node.height;
+		var innerRatio  = innerWidth / innerHeight;
+
+		// style container
+		var imgx = document.createElement('object-fit');
+
+		imgx.appendChild(node.parentNode.replaceChild(imgx, node));
+
+		for (var key in imgCSS) imgx.runtimeStyle[key] = imgCSS[key];
+
+		// style image
+		var newSize;
+
+		if (objectFit === 'fill') {
+			if (img) {
+				setCSS.width = outerWidth;
+				setCSS.height = outerHeight;
+			} else {
+				setCSS['-ms-transform-origin'] = '0% 0%';
+				setCSS['-ms-transform'] = 'scale(' + outerWidth / innerWidth + ',' + outerHeight / innerHeight + ')';
+			}
+		} else if (innerRatio < outerRatio ? objectFit === 'contain' : objectFit === 'cover') {
+			newSize = outerHeight * innerRatio;
+
+			setCSS.width  = Math.round(newSize) + 'px';
+			setCSS.height = outerHeight + 'px';
+			setCSS.marginLeft = Math.round((outerWidth - newSize) / 2) + 'px';
+		} else {
+			newSize = outerWidth / innerRatio;
+
+			setCSS.width  = outerWidth + 'px';
+			setCSS.height = Math.round(newSize) + 'px';
+			setCSS.marginTop = Math.round((outerHeight - newSize) / 2) + 'px';
+		}
+	}
+};
+this.fitie.init = function () {
+	if (document.body) {
+		var all = document.querySelectorAll('img,video');
+		var index = -1;
+
+		while (all[++index]) fitie(all[index]);
+	} else {
+		setTimeout(fitie.init);
+	}
+};
+
+if (/MSIE|Trident/.test(navigator.userAgent)) this.fitie.init();
+;
+/**
+* Helper function to track link clicks, right now we add an event
+* handler to all links with the data-instrumentation attribute
+* and fire a GA event on click.
+* @author Preet Jassi
+* @file util-instrumentation.js
+*/
+(function () {
+	window.dataLayer = window.dataLayer || [];
+	var links = document.getElementsByTagName('a'),
+        i = links.length,
+        events = [];
+	while (i--) {
+		if (links[i].getAttribute('data-instrumentation')) {
+			var callback = function (instr) {
+				return function () {
+					window.dataLayer.push({
+						'event': 'instrumentationEvent',
+						'label': instr
+					});
+				};
+			}(links[i].getAttribute('data-instrumentation'));
+			events.push([links[i], callback]);
+			if (links[i].addEventListener) {
+				links[i].addEventListener('click', callback, false);
+			} else {
+				if (links[i].attachEvent) {
+					links[i].attachEvent('onclick', callback);
+				} else {
+					links[i].onclick = callback;
+				}
+			}
+		}
+	}
+	if (window.addEventListener) {
+		window.addEventListener('unload', function () {
+			var i = events.length;
+			while (i--) {
+				events[i][0].removeEventListener('click', events[i][1], false);
+			}
+			events = null;
+		}, false);
+	}
+	if (window.detachEvent) {
+		window.attachEvent('onunload', function () {
+			var i = events.length;
+			while (i--) {
+				events[i][0].detachEvent('onclick', events[i][1]);
+			}
+			events = null;
+		});
+	}
+}());
+;
+/**
+ * @file util.js
+ * @desc Defines a Utility class for common functions.
+ *       jQuery is a dependency.
+ * @author Jackie Hii
+ * @copyright © INDOCHINO 2017
+ */
+(function() {
+    
+    const ADD_ITEM_EVENT   = 'global:addToBag';
+    const REFRESH_BAG_EVENT = 'global:refreshBag';
+    const ADD_OUTFIT_EVENT = 'WeddingParty:addOutfit';
+    const TOGGLE_LOGIN_EVENT = 'global:toggleLoginOverlay';
+    const PAGE_VIEWED_EVENT = 5101;
+   
+    const PHONE_PORTRAIT_LARGE_WIDTH = 414;
+    const TABLET_PORTRAIT_WIDTH = 768;
+    const TABLET_LANDSCAPE_WIDTH = 1024;
+  
+    const DESKTOP_IMG_ATTR = "data-dlarge";
+    const MOBILE_IMG_ATTR = "data-dsmall";
+    const BANNER_IMAGE_NAME_ATTRIBUTE = "banner-image"; 
+
+    const MESSAGE = {
+        SUCCESS: 'success',
+        ERROR:   'error'
+    };
+    const amplienceLinkClass = "link";
+
+    function Utility() {
+        var self = this; 
+        /**
+        * Refresh the full shopping bag component
+        * @param 
+        * @return {void}
+        * @method refreshBag
+        */
+        this.refreshBag = function() {
+            self.dispatchEvent(REFRESH_BAG_EVENT, null);
+        }
+
+        /**
+         * Add an item to the shopping bag component.
+         * @param {JSON} json
+         * @return {void}
+         * @method addProduct
+         */
+        this.addProduct = function(json) {
+            self.dispatchEvent(ADD_ITEM_EVENT, json);
+        }
+
+        /**
+         * Add an outfit to the shopping bag.
+         * @param {JSON} json
+         * @return {void}
+         * @method addOutfit
+         */
+        this.addOutfit = function(json) {
+            self.dispatchEvent(ADD_OUTFIT_EVENT, { items: json });
+        }
+
+        /**
+         * Show success banner at the top of the page.
+         * @param {string} header
+         * @param {string} msg
+         * @return {void}
+         * @method showSuccessBanner
+         */
+        this.showSuccessBanner = function(heading, msg) {
+            self.showTopBanner(heading, msg, 'success');
+        };
+
+        /**
+         * Show error banner at the top of the page.
+         * @param {string} header
+         * @param {string} msg
+         * @return {void}
+         * @method showErrorBanner
+         */
+        this.showErrorBanner = function(heading, msg) {
+            self.showTopBanner(heading, msg, 'error');
+        }
+
+        /**
+         * Show server error banner at the top of the page.
+         * @return {void}
+         * @method serverCallFailure
+         */
+        this.serverCallFailure = function() {
+            self.showErrorBanner(
+                'Server Error',
+                'Server response error. Please try again.'
+            );
+        }
+
+        /**
+         * Display a notification banner that appears beneath the header.
+         * @param {string} heading
+         * @param {string} msg
+         * @param {string} errorMsg
+         * @return {void}
+         * @method showTopBanner
+         */
+        this.showTopBanner = function(heading, msg, msgType) {
+            var topBanner      = $('.topBanner'),
+                topBannerIcon  = $('.topBanner .icon.x-lrg'),
+                topBannerInner = $('.topBanner__inner'),
+                topBannerHdg   = $('.topBanner__msg__heading'),
+                topBannerMsg   = $('.topBanner__msg__body'),
+                topBannerClose = $('.topBanner__close');
+
+            if (msgType === MESSAGE.SUCCESS) {
+                topBannerInner.addClass('topBanner__inner--success');
+                topBannerIcon.addClass('success');
+            } else if (msgType === MESSAGE.ERROR) {
+                topBannerInner.addClass('topBanner__inner--error');
+                topBannerIcon.addClass('error');
+            }
+
+            topBannerHdg.html(heading);
+            topBannerMsg.html(msg);
+
+            topBannerClose.on('click', self.clearTopBanner);
+
+            topBanner.removeClass('hide');
+            
+            setTimeout(function() {
+                topBanner.addClass('topBanner--active');
+            }, 100);
+        }
+
+        /**
+         * Hides and clears notification banner that appears beneath the header.
+         * @return {void}
+         * @method showTopBanner
+         */
+        this.clearTopBanner = function(e) {
+            if (e) e.preventDefault();
+
+            var topBanner      = $('.topBanner'),
+                topBannerIcon  = $('.topBanner .icon.x-lrg'),
+                topBannerInner = $('.topBanner__inner'),
+                topBannerHdg   = $('.topBanner__msg__heading'),
+                topBannerMsg   = $('.topBanner__msg__body'),
+                topBannerClose = $('.topBanner__close');
+
+            topBanner.removeClass('topBanner--active');
+            topBannerClose.off('click', self.clearTopBanner);
+
+            setTimeout(function() {
+                topBannerIcon.prop('class', 'icon x-lrg notification');
+                topBannerInner.prop('class', 'topBanner__inner');
+                topBannerHdg.html('');
+                topBannerMsg.html('');
+                topBanner.addClass('hide');
+            }, 500);
+        }
+
+        /**
+         * Toggle the login overlay from the header bar.
+         * @param {boolean} boolVal - show or hide
+         * @param {string} msg - display message on the overlay
+         * @param {string} returnUrl - redirect upon success
+         * @return {void}
+         * @method toggleLoginOverlay
+         */
+        this.toggleLoginOverlay = function(boolVal, msg, returnUrl) {
+            self.dispatchEvent(TOGGLE_LOGIN_EVENT, {
+                boolVal: boolVal,
+                msg: msg,
+                returnUrl: returnUrl,
+            });
+        }
+
+        /*-----------------------------------------------------------------*
+         *                         RENDER REACT                            *
+         *-----------------------------------------------------------------*/
+
+        /**
+         * Display React component for Customizations.
+         * @param {string} dataUrl
+         * @param {boolean} hideUpsell
+         * @return {void}
+         * @method showCustomize
+         */
+        this.showCustomize = function(dataUrl, hideUpsell, monogramOnly, data, algoliaQueryId) {
+            // Create mount node if it does not already exist
+            if (!$('.react-customize').length) {
+                $('body').append($('<div/>', { class: 'react-customize' }));
+            }
+
+            try {
+                ReactJS.renderCustomizeOverlay({
+                    dataUrl: dataUrl,
+                    saveUrl: '/Customization/' + (dataUrl.indexOf('Existing') !== -1 ? 'SaveUpdated' : 'SaveNew'),
+                    hideUpsell: hideUpsell === true,
+                    monogramOnly: monogramOnly === true,
+                    fromShoppingBag: window.basketRefresh ? false : $('.shopping-bag-container').is(":visible"),
+                    data: data,
+                    algoliaQueryId: algoliaQueryId
+                }, document.querySelector('.react-customize'));
+            } catch (e) {
+                this.showErrorBanner('Something went wrong with Customize module.', 'Please clear your browser cache and reload.');
+            }
+        }
+
+        /**
+         * Display React component for Measurements.
+         * @param {string} measurementSystem
+         * @return {void}
+         * @method showMeasurements
+         */
+        this.showMeasurements = function(measurementSystem) {
+            if (ReactJS.renderMeasurementsWomen) {
+                // Create mount node if it does not already exist
+                if (!$('.react-measurements').length) {
+                        $('body').append($('<div/>', { class: 'react-measurements' }));
+                }
+
+                const customerIdInput = document.getElementById('hCustomerId');
+                let customerId = null;
+                if (customerIdInput) {
+                    customerId = customerIdInput.value;
+                }
+
+                ReactJS.renderMeasurementsWomen($('.react-measurements')[0], {
+                    measurementSystem: measurementSystem,
+                    customerId
+                });
+            }
+        }
+
+        /**
+         * Display the Newsletter Overlay component.
+         * @param {string} title
+         * @param {string} subtitle
+         * @param {string} bodyText
+         * @param {string} interestPoint
+         * @return {void}
+         * @method showNewsletterOverlay
+         */
+        this.showNewsletterOverlay = function(title, subtitle, bodyText, interestPoint) {
+            // Create mount node if it does not already exist
+            if (!$('.react-newsletter-overlay').length) {
+                $('body').append($('<div/>', { class: 'react-newsletter-overlay' }));
+            }
+
+            ReactJS.renderNewsletterOverlay({
+                title: title,
+                subtitle: subtitle,
+                bodyText: bodyText,
+                interestPoint: interestPoint,
+            }, document.querySelector('.react-newsletter-overlay'));
+        }
+
+        /*-----------------------------------------------------------------*
+         *                            HELPERS                              *
+         *-----------------------------------------------------------------*/
+
+        /**
+        * Loads a script dynamically
+        * @param {string} url - the asset to load
+        * @param {Boolean} before - if we should load the script before the other scripts or not
+        * @return {void}
+        * @method loadScript
+        */
+        this.loadScript = function(url, fn) {
+
+            var script = document.createElement('script'),
+                scripts = document.getElementsByTagName('script'),
+                first,
+                head;
+
+            script.type = 'text/javascript';
+            script.async = true;
+
+            // callback function is specified, execute the callback after
+            // the script has loaded
+            if (fn !== undefined) {
+
+                if (script.readyState) { //IE
+                    script.onreadystatechange = function() {
+                        if (script.readyState === 'loaded' || script.readyState === 'complete') {
+                            script.onreadystatechange = null;
+                            fn();
+                        }
+                    }
+                } else {
+                    script.onload = function() {
+                        fn();
+                    }
+                }
+            }
+
+            script.src = url;
+
+            if (scripts.length) {
+                first = scripts[0];
+                first.parentNode.insertBefore(script, first);
+            } else {
+                head = document.getElementsByTagName('head')[0];
+                head.appendChild(script);
+            }
+        }
+
+        /**
+         * Dispatch a custom event with optional event data.
+         * @param {string} evtName
+         * @param {object} evtData
+         * @return {void}
+         * @method dispatchEvent
+         */
+        this.dispatchEvent = function(evtName, evtData) {
+            var evt = document.createEvent('Event');
+
+            evt.initEvent(evtName, true, true);
+
+            if (evtData) {
+                evt.data = evtData;
+            }
+
+            document.dispatchEvent(evt);
+        }
+
+        /**
+         * Get URL query string parameter.
+         * @param {string} name
+         * @return {string}
+         * @method getUrlParam
+         */
+        this.getUrlParam = function(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+
+            var regex   = new RegExp('[\\?&]' + name + '=([^&#]*)', 'i'),
+                results = regex.exec(location.search);
+
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        /**
+         * Basic debounce method for performance optimization.
+         * @param {function} func
+         * @param {integer} wait
+         * @param {boolean} immediate
+         * @return {function}
+         * @method debounce
+         */
+        this.debounce = function(func, wait, immediate) {
+            var timeout;
+
+            return function() {
+                var context = self,
+                    args    = arguments;
+
+                var later = function() {
+                    timeout = null;
+                    if (!immediate) {
+                        func.apply(context, args);
+                    }
+                }
+
+                var callNow = immediate & !timeout;
+
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait || 200);
+
+                if (callNow) {
+                    func.apply(context, args);
+                }
+            }
+        }
+
+        /**
+         * Basic throttle method for performance optimization.
+         * @param {function} func
+         * @param {integer} timeout
+         * @return {function}
+         * @method debounce
+         */
+        this.throttle = function(func, timeout) {
+            var isWaiting = false;
+
+            return function() {
+                if (!isWaiting) {
+                    func();
+                    isWaiting = true;
+
+                    setTimeout(function() {
+                        isWaiting = false;
+                    }, timeout)
+                }
+            }
+        }
+
+        /*-----------------------------------------------------------------*
+         *                   METRIC / IMPERIAL CONVERSION                  *
+         *-----------------------------------------------------------------*/
+
+        /**
+         * Convert mass from pounds to kilograms.
+         * @param {number} lbs
+         * @param {number} roundTo number of decimal places
+         * @return {number}
+         * @method convertLbsToKg
+         */
+        this.convertLbsToKg = function(lbs, roundTo) {
+            var forRounding = Math.pow(10, (roundTo || 0));
+
+            return Math.round((lbs / 2.205) * forRounding) / forRounding;
+        }
+
+        /**
+         * Convert mass from kilograms to pounds.
+         * @param {number} kg
+         * @param {number} roundTo number of decimal places
+         * @return {number}
+         * @method convertKgToLbs
+         */
+        this.convertKgToLbs = function(kg, roundTo) {
+            var forRounding = Math.pow(10, (roundTo || 0));
+
+            return Math.round((kg * 2.205) * forRounding) / forRounding;
+        }
+
+        /**
+         * Convert length from inches to centimetres.
+         * @param {number} inches
+         * @param {number} roundTo number of decimal places
+         * @return {number}
+         * @method convertInchesToCm
+         */
+        this.convertInchesToCm = function(inches, roundTo) {
+            var forRounding = Math.pow(10, (roundTo || 0));
+
+            return Math.round((inches * 2.54) * forRounding) / forRounding;
+        }
+
+        /**
+         * Convert length from centimetres to inches.
+         * @param {number} cm
+         * @param {number} roundTo number of decimal places
+         * @return {number}
+         * @method convertCmToInches
+         */
+        this.convertCmToInches = function(cm, roundTo) {
+            var forRounding = Math.pow(10, (roundTo || 0));
+
+            return Math.round((cm / 2.54) * forRounding) / forRounding;
+        }
+
+        /*-----------------------------------------------------------------*
+         *                           ESB EVENTS                            *
+         *-----------------------------------------------------------------*/
+
+        /**
+         * Call the ESB to send page view data for the personalization engine.
+         * @param {number} customerId
+         * @param {number} productId
+         * @return {void}
+         * @method trackPersonalization
+         */
+        this.trackPersonalization = function(customerId, orderId, productId) {
+            if (!orderId && !customerId) return;
+
+            var esbUrl = $('#esbUrl').val();
+            var esbApiKey = $('#esbApiKey').val();
+            var personalizationEvt = {
+                order_id: parseInt(orderId),
+                product_id: parseInt(productId),
+                event_id: PAGE_VIEWED_EVENT,
+                event_date: Math.floor(Date.now()/1000)
+            };
+
+            if (customerId) personalizationEvt.customer_id = parseInt(customerId);
+
+            if (esbUrl && esbApiKey) {
+                $.ajax({
+                    method: 'post',
+                    url: esbUrl + '/customer/product/personalization',
+                    data: JSON.stringify(personalizationEvt),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'api-key': esbApiKey,
+                        'Authorization': 'Basic aW5kb2NoaW5vOlBAc3N3MHJk'
+                    },
+                    crossDomain: true,
+                });
+            }
+        }
+
+        /*-----------------------------------------------------------------*
+         *                        GTM CUSTOM EVENTS                        *
+         *-----------------------------------------------------------------*/
+
+        this.trackProductImpressions = function (productObjArr, currency, impressionSource) {
+            if (currency == null || typeof (currency) == 'undefined') {
+                currency = $("#currentCurrency").val();
+            }
+            if (productObjArr.length > 0) {
+                var obj = {
+                    event: 'uaEEEvent',
+                    uaEECategory: 'Ecommerce',
+                    uaEEAction: 'Product Impression',
+                    uaEELabel: impressionSource,
+                    ecommerce: {
+                        currencyCode: currency,
+                        impressions: productObjArr.map((product, i) => ({
+                            id: product.id,
+                            name: product.name,
+                            list: impressionSource === "PLP" ? product.name + ": " + impressionSource : impressionSource,
+                            category: String(product.category || '').toLowerCase(),
+                            position: product.position,
+                            price: product.price
+                        }))
+                    }
+                };
+                //sending to google analytics
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({ ecommerce: undefined, }, obj); 
+            }
+        }
+
+        /**
+         * Dispatch GTM event for adding a product to bag.
+         * @method trackAddToCart
+         */
+        this.trackAddToCart = function (currency, addedProducts, list, evtCallback, evtTimeout, addLocation, event_id) {
+         
+            var fbcGuidId = null;
+            var fbcElemt = $('#fbcRandomGuidId');
+            if (fbcElemt && fbcElemt !== undefined) {
+                fbcGuidId = fbcElemt.val(); 
+            } 
+
+            // If the product is a measurement appointment, don't send the event
+            if (addedProducts && addedProducts.length == 1 && addedProducts.some((p) => p.name.toLowerCase() == "measurement appointment"))
+            {
+                return;
+            }
+
+            let event = {
+                event: 'addToCart',
+                ecommerce: {
+                    currencyCode: currency,
+                    add: {
+                        products: addedProducts
+                    }
+                },
+                // The following fields are required for Facebook's AddToCart event:
+                content_ids: addedProducts.map(function(product) {
+                    return product.id;
+                }),
+                purchase_value: addedProducts.reduce(function(subtotal, product) {
+                    return subtotal + parseFloat(product.price);
+                }, 0), 
+            };
+
+            
+            var fbcExternalId = document.getElementById("fbcExternalId"); 
+            if (fbcExternalId && fbcExternalId !== undefined) {
+                event.external_id = fbcExternalId.value;
+            }
+
+            if (event_id)
+            {
+                event.event_id = event_id;
+            }
+            else
+            {
+                var fbcEventId = document.getElementById("fbcEventId");
+                if (fbcEventId && fbcEventId !== undefined && fbcGuidId != null && fbcGuidId != '')
+                {
+                    event.event_id = fbcEventId.value + "_" + fbcGuidId;
+                }
+                else
+                {
+                    var fbcOrderId = document.getElementById("orderId");
+                    if (fbcOrderId && fbcOrderId !== undefined && fbcGuidId != null && fbcGuidId != '')
+                    {
+                        event.event_id = "o_" + fbcOrderId.value + "_" + fbcGuidId;
+                    }
+                }
+            }
+            
+             
+            
+            if (addLocation !== undefined) {
+                event.uaEECategory = "Ecommerce";
+                event.uaEEAction = "Add to Cart";
+                event.uaEELabel = addLocation;
+                event.ecommerce.add.actionField = {list: addLocation};
+                event.ecommerce.add.products[0].category = event.ecommerce.add.products[0].category.toLowerCase();
+            }
+
+            if (list) {
+                event.ecommerce.add.actionField = {
+                    list: list,
+                };
+            }
+
+            if (evtCallback) event.eventCallback = evtCallback;
+            if (evtTimeout) event.eventTimeout = evtTimeout;
+
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({ ecommerce: undefined }, event);
+        }
+
+        this.trackClearCart = function (cart, evtCallback, evtTimeout) {
+            var event = { event: 'cartClearEvent' };
+            if (evtCallback) event.eventCallback = evtCallback;
+            if (evtTimeout) event.eventTimeout = evtTimeout;
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push(event);
+        }
+
+         /**
+          * Dispatch GTM event for tracking the current state of the shopping bag.
+          * @method trackCart
+          */
+         this.trackCart = function(cart, evtCallback, evtTimeout) {
+            var event   = { event: 'cartEvent' },
+                cartVar = [];
+
+            for (var setId in cart) {
+                try {
+                    cartVar.push({
+                        item: cart[setId].ProductId != null ? cart[setId].ProductId.toString() : "",
+                        unique_id: cart[setId].ProductId.toString(),
+                        price: cart[setId].DisplayFormattedPrice.replace('$', ''),
+                        quantity: cart[setId].OrderItems.length,
+                    });
+                }
+                catch (e) {
+                }
+                
+                if (!$.isEmptyObject(cart[setId].VestSubitems)) {
+                    var vestUpsell = cart[setId].AvailableProductUpsellVest;
+                    var quantity = Object.keys(cart[setId].VestSubitems).reduce(function(qty, itemId) {
+                        return qty + cart[setId].VestSubitems[itemId].length;
+                    }, 0);
+
+                    if (!vestUpsell) {
+                        var vestArray = cart[setId].VestSubitems[cart[setId].OrderItems[0]];
+                        vestUpsell = quantity > 0 ? vestArray[0] : null;
+                    }
+                    try {
+                        if (vestUpsell && quantity > 0) {
+                            cartVar.push({
+                                item: vestUpsell.Id.toString(),
+                                unique_id: vestUpsell.Id.toString(),
+                                price: vestUpsell.DisplayFormattedPrice.replace('$', ''),
+                                quantity: quantity,
+                            });
+                        }
+                    }
+                    catch (e) {
+                    }
+                }
+
+                if (!$.isEmptyObject(cart[setId].PantSubitems)) {
+                    var pantArray = cart[setId].PantSubitems[Object.keys(cart[setId].PantSubitems)[0]];
+                    var pantItem = pantArray.length ? pantArray[0] : null;
+                    var quantity = Object.keys(cart[setId].PantSubitems).reduce(function(qty, itemId) {
+                        return qty + cart[setId].PantSubitems[itemId].length;
+                    }, 0);
+
+                    if (pantItem && quantity > 0) {
+                        try {
+                            cartVar.push({
+                                item: pantItem.ProductId.toString(),
+                                unique_id: pantItem.ProductId.toString(),
+                                price: pantItem.DisplayFormattedPrice.replace('$', ''),
+                                quantity: quantity,
+                            });
+                        }
+                        catch (e) { }
+                    }
+                }
+            }
+
+            event.cart = cartVar;
+
+            if (evtCallback) event.eventCallback = evtCallback;
+            if (evtTimeout) event.eventTimeout = evtTimeout;
+
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push(event);
+         }
+
+         /**
+          * Dispatch GTM event for tracking the current state of the shopping bag.
+          * LEGACY FLOW VERSION.
+          * @method trackLegacyCart
+          */
+          this.trackLegacyCart = function(cart, evtCallback, evtTimeout) {
+            var event   = { event: 'cartEvent' },
+                cartVar = [],
+                pIndex  = {}
+                counter = 0;
+
+            cart.forEach(function(item, i) {
+                if (item.ProductId in pIndex) {
+                    var index = pIndex[item.ProductId];
+                    cartVar[index].quantity++;
+                } else {
+                    pIndex[item.ProductId] = counter;
+                    
+                    cartVar.push({
+                        item: item.ProductId,
+                        unique_id: item.ProductId,
+                        price: item.Price + '',
+                        quantity: 1
+                    });
+
+                    counter++;
+                }
+            });
+
+            event.cart = cartVar;
+
+            if (evtCallback) event.eventCallback = evtCallback;
+            if (evtTimeout) event.eventTimeout = evtTimeout;
+
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push(event);
+         }
+
+        /**
+         * Track internal promotion clicks for Google Analytics.
+         * @method trackPromotionClick
+         */
+          this.trackPromotionClick = function (promoObj) {
+              
+            if (
+                promoObj.destinationUrl !== undefined 
+                && promoObj.destinationUrl !== ''
+                && promoObj.destinationUrl !== '/'
+            ) {
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({
+                    event: 'promotionClick',
+                    uaEECategory: 'Internal Promotion',
+                    uaEEAction: (promoObj != null && promoObj.eventAction != null &&  promoObj.eventAction != "undefined") ? promoObj.eventAction : 'Button Click',
+                    uaEELabel: promoObj != null ? promoObj.position : '',
+                    eventComponent: (promoObj != null && promoObj.gaTracking != 'undefinded' && promoObj.gaTracking != null) ? promoObj.gaTracking.toString() : '0',
+                    ecommerce: {
+                        promoClick: {
+                            promotions: [{
+                                id: promoObj.id,
+                                name: promoObj.name,
+                                creative: promoObj.creative,
+                                position: promoObj.position
+                            }]
+                        }
+                    },
+                    eventCallback: function () {
+                        document.location = promoObj.destinationUrl;
+                    },
+                    eventTimeout: 3000,
+                });
+
+                //Datalayer push event for Select Promotion
+                var currentPageUrl = window.location.href;
+                var datalayerArr = window.dataLayer;
+                var customerId = datalayerArr[2].customer.id;
+                if (customerId !== undefined && customerId !== null && customerId !== '0') {
+                    user_status = 'Logged in';
+                    user_id = customerId;
+                } else {
+                    user_status = 'Not logged in';
+                    user_id = '0';
+                }
+
+                window.dataLayer.push({
+                    'event': 'select_promotion',
+                    'ecommerce': {
+                        'promotion_id': promoObj.id,
+                        'creative_name': promoObj.creative,
+                        'creative_slot': promoObj.position,
+                        'promotion_name': promoObj.name,
+                        'items': [
+                            {
+                                item_id: "",
+                                item_name: "",
+                                item_category: "",
+                                item_category2: "",
+                                item_list_id: "",
+                                item_list_name: "",
+                            }
+                        ],
+                        'page': currentPageUrl,
+                        'user_id': user_id,
+                        'user_login_status': user_status
+                    }
+                });
+            }
+          }
+
+          var promotionImpressions = {};
+        /**
+        * Track internal promotion views for Google Analytics.
+        * @method trackPromotionImpressions
+        */
+          this.trackPromotionImpressions = function (promoArr, usePositionInKey) {
+              if (promoArr.length > 0) {
+                  if (typeof (usePositionInKey) == undefined || usePositionInKey == null) {
+                      usePositionInKey = false;
+                  }
+                  window.dataLayer = window.dataLayer || [];
+                  var promotions = promoArr.filter(function (item) {
+                      var key = `${item.id}:${item.name}`;
+                      if (usePositionInKey) {
+                          key = `${key}:${item.position}`;
+                      }
+                      if (!(key in promotionImpressions)) {
+                          promotionImpressions[key] = true;
+                          return true;
+                      }
+                      return false;
+                  }).map(function (item) {
+                      return {
+                          id: item.id,
+                          name: item.name,
+                          creative: item.creative,
+                          position: item.position
+                      };
+                  });
+                  if (promotions != null && promotions.length > 0) {
+                      window.dataLayer.push({
+                          'event': 'uaPromoView',
+                          'uaEECategory': "Internal Promotion",
+                          'uaEEAction': "Promotion Impression",
+                          'uaEELabel': (promoArr.length > 0 && typeof (promoArr[0].label) != "undefined") ? promoArr[0].label : '',
+                          'eventComponent': (promoArr.length > 0 && promoArr[0].gaTracking) ? '1' : '0',
+                          'ecommerce': {
+                              'promoView': {
+                                  'promotions': promotions
+                              }
+                          }
+                      });
+
+                      //Datalayer push event for View Promotion
+                      var currentPageUrl = window.location.href;
+                      var datalayerArr = window.dataLayer;
+                      var customerId = datalayerArr[2].customer.id;
+                      if (customerId !== undefined && customerId !== null && customerId !== '0') {
+                          user_status = 'Logged in';
+                          user_id = customerId;
+                      } else {
+                          user_status = 'Not logged in';
+                          user_id = '0';
+                      }
+
+                      window.dataLayer.push({
+                          'event': 'view_promotion',
+                          'ecommerce': {
+                              'promotion_id': promotions[0].id,
+                              'creative_name': promotions[0].creative,
+                              'creative_slot': promotions[0].position,
+                              'promotion_name': promotions[0].name,
+                              'items': [
+                                  {
+                                      item_id: "",
+                                      item_name: "",
+                                      item_category: "",
+                                      item_category2: "",
+                                      item_list_id: "",
+                                      item_list_name: "",
+                                  }
+                              ],
+                              'page': currentPageUrl,
+                              'user_id': user_id,
+                              'user_login_status': user_status
+                          }
+                      });
+                  }
+              }
+          }
+
+          /**
+          * Determine if an element is in the viewport
+          * @param {el} document element
+          * @param {percentageOfElementFromTop} document element
+          * @return {bool}
+          * @method isInViewport
+          */
+          this.isInViewport = function (el, percentageOfElementFromTop) {
+            if(el) {
+              percentageOfElementFromTop = percentageOfElementFromTop || .25;
+              var elementTop = $(el).offset().top;
+              var elementBottom = elementTop + ($(el).outerHeight() * percentageOfElementFromTop);
+
+              var viewportTop = $(window).scrollTop();
+              var viewportBottom = viewportTop + $(window).height();
+
+              return elementBottom <= viewportBottom && elementTop >= viewportTop;
+            }
+            else {
+                return false;
+            }
+          };
+
+          /**
+          * Determine if the child element is in the view of the parent element that scrolls
+          * @param {container} parent element
+          * @param {element} child element which visibility we are checking
+          * @param {partial} indicate if we allow partial visibity of child | percentage of allowed visiblity
+          * @return {bool}
+          * @method checkInView
+          */
+          this.checkInView = function (container, element, partial) {
+              let cTop = container.scrollTop;
+              let cBottom = cTop + container.clientHeight;
+              //element position
+              let eTop = element.offsetTop;
+              let eBottom = eTop + element.clientHeight;
+
+              var isTotal = (eTop >= cTop && eBottom <= cBottom);
+              var isPartial = false;
+
+              if (partial === true) {
+                  isPartial = (eTop < cTop && eBottom > cTop) || (eBottom > cBottom && eTop < cBottom);
+              } else if (typeof partial === "number") {
+                  if (eTop < cTop && eBottom > cTop) {
+                      isPartial = ((eBottom - cTop) * 100) / element.clientHeight > partial;
+                  } else if (eBottom > cBottom && eTop < cBottom) {
+                      isPartial = ((cBottom - eTop) * 100) / element.clientHeight > partial;
+                  }
+              }
+              return (isTotal || isPartial);
+          }
+
+         /**
+         * Determine if an element is in the horizontal viewport based on window
+         * @param {el} document element
+         * @return {bool}
+         * @method isInHorizontalViewport
+         */
+          this.isInHorizontalViewport = function (el) {
+              var elementLeft = $(el).offset().left;
+              var elementRight = elementLeft + ($(el).outerWidth());
+              var viewportLeft = $(window).scrollLeft();
+              var viewportRight = viewportLeft + $(window).width();
+              return elementLeft >= viewportLeft && elementRight <= viewportRight;
+          };
+
+        /*-----------------------------------------------------------------*
+         *                     GOOGLE ANALYTICS EVENTS                     *
+         *-----------------------------------------------------------------*/
+
+         /**
+          * Dispatch GA event for adding an upsell vest.
+          * @method trackAddUpsellVest
+          */
+          this.trackAddUpsellVest = function() {
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({
+                event: 'gaEvent',
+                gaEvent: {
+                    category: 'ShoppingBag',
+                    action: 'Added Upsell Vest'
+                }
+            });
+          }
+
+         /**
+          * Dispatch GA event for adding an upsell vest.
+          * @method trackAddUpsellPants
+          */
+          this.trackAddUpsellPants = function() {
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({
+                event: 'gaEvent',
+                gaEvent: {
+                    category: 'ShoppingBag',
+                    action: 'Added Pants'
+                }
+            });
+          }
+        
+        /**
+         * Dispatch GA event for newsletter sign up.
+         * @method trackNewsletterSignUp
+         */
+        this.trackNewsletterSignUp = function (email, label) {
+            var customerId = window.dataLayer[2].customer.id
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({
+                event: 'gaEvent',
+                newsletterEmail: email,
+                gaEvent: {
+                    category: 'Email Newsletter',
+                    action: 'Newsletter Sign Up Click',
+                    label: label
+                }
+            });
+
+            dataLayer.push({
+                'event': 'newsletter_subscription',
+                'page': window.location.href,
+                'user_id': customerId,
+                'user_login_status': (customerId && customerId !== '0') ? "Logged in" : "Not logged in"
+            });
+        }
+
+        this.trackCategoryView = function (pageType, collectionKey, productId) {
+            var event = { event: 'pageViewCategoryEvent' };
+            if (pageType == "collection" && collectionKey != null) {
+                event.pageCategory = collectionKey;
+            } else if (pageType == "product" && productId != null) {
+                event.product = { id: productId };
+            }
+            event.pageType = pageType;
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push(event);
+        }
+
+        this.trackPlaceOrderPaymentCollection = function (paymentType) {
+            try {
+                var event = { event: 'placeOrderPaymentCollectionEvent' };
+                event.paymentType = paymentType;
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push(event);
+            }
+            catch (e) {
+            }
+        }
+
+        this.initSectionImages = function (mobileBreakPoint, parentSelector, callbackFunc) {
+            var width = window.innerWidth;
+            var useDesktop = true;
+            if (width <= mobileBreakPoint) {
+                useDesktop = false;
+            }
+            $(parentSelector).each(function (i, banner) {
+                var imgs = banner.querySelectorAll('[' + DESKTOP_IMG_ATTR + ']');
+                imgs.forEach(img => {
+                    var imgSrc = "";
+                    if (useDesktop) {
+                        imgSrc = img.getAttribute(DESKTOP_IMG_ATTR);
+                    } else {
+                        imgSrc = img.getAttribute(MOBILE_IMG_ATTR);
+                        if (imgSrc == null || imgSrc == "") {
+                            imgSrc = img.getAttribute(DESKTOP_IMG_ATTR);
+                        }
+                    }
+                    if (imgSrc != "" && imgSrc != null) {
+                        img.src = imgSrc;
+                    }
+                });
+            });
+            if (callbackFunc != null && typeof (callbackFunc) != 'undefined' && typeof (callbackFunc) == "function") {
+                callbackFunc();
+            }
+        }
+
+        this.internalCampaignOnLoadAmplience = function(element) { 
+            var promoDiv = null;
+            var isTile = false;
+            if(element != null && typeof(element) != "undefined") {
+                promoDiv = $(element); 
+                isTile = true;
+            } else {
+                promoDiv = $("[data-tag=internalPromotion]"); 
+            }
+            if (promoDiv!=null && promoDiv.length > 0) {
+                for (var index = 0; index < promoDiv.length; index++) {
+                    if(!isTile && promoDiv[index].classList.contains("collection__item")) { continue; }
+                    var promoObj = getCampaignData($(promoDiv[index]));
+                    if (promoObj !== null) {
+                        var imgList = $(promoDiv[index]).find("img");
+                        for (var imgIndex = 0; imgIndex < imgList.length; imgIndex++) {
+                            $(imgList[imgIndex]).on('click', function (event) {
+                                event.stopPropagation();
+                                var parentDiv = $(this).closest("[data-tag=internalPromotion]");
+                                if (parentDiv.length > 0) {
+                                    var tempPromo = getCampaignData($(parentDiv[0]));
+                                    if (tempPromo !== null) {
+                                        tempPromo.eventAction = "Image Click";
+                                        tempPromo = handleGridTileImpressionData(tempPromo, this);
+                                        indo.Util.trackPromotionClick(tempPromo);
+                                    }
+                                }
+                            });
+                        }
+                    
+                   
+                        var aList = $(promoDiv[index]).find("a");
+                        for (var i = 0; i < aList.length; i++) {
+                          
+                            var excludeClickAttr = $(aList[i]).attr("data-exclude-gtm-click");
+                            if (excludeClickAttr != null && typeof (excludeClickAttr) != "undefined" && excludeClickAttr == "1")
+                            { continue; }
+                            $(aList[i]).on('click', function (event) {
+                               
+                                event.stopPropagation();
+                                var pDiv = $(this).closest("[data-tag=internalPromotion]");
+                                if (pDiv != null && pDiv.length > 0) {
+                                    var tempPromo = getCampaignData($(pDiv[0]));
+                                    if (tempPromo != null) {
+                                        tempPromo = handleGridTileImpressionData(tempPromo, this);
+                                        //destination here needs to be coming from a href in case we have secondary link
+                                        tempPromo.destinationUrl = $(this).attr("href");
+                                        tempPromo.eventAction = "Button Click";
+                                   
+                                        var aClassList = $(this).attr('class').split(/\s+/);
+                                        for (var ci = 0; ci < aClassList.length; ci++) {
+                                            if (aClassList[ci] === amplienceLinkClass) {
+                                                tempPromo.eventAction = "Label Click";
+                                                break;
+                                            }
+                                        }
+                                        var btnGroupAttr = $(this).attr("data-button-group");
+                                        if (btnGroupAttr != null && typeof (btnGroupAttr) != "undefined" && btnGroupAttr == "1") {
+                                            tempPromo.eventAction += " " + $(this).attr("data-index");
+                                        }
+                                        indo.Util.trackPromotionClick(tempPromo);
+                                    }
+                               
+                                }
+                            });
+                        }
+                    
+                    }
+                }
+            }
+        }
+
+        function getCampaignData(element) {
+            var promoIdArr = $(element).find('[data-promo-id]');
+        
+            if (promoIdArr.length > 0) {
+                var promoElem = $(promoIdArr[0]);
+                return {
+                    destinationUrl: $(promoElem).attr("data-promo-destination-Url"),
+                    id: $(promoElem).attr("data-promo-id"),
+                    name: $(promoElem).attr("data-promo-name"),
+                    creative: $(promoElem).attr("data-promo-creative"),
+                    position: $(promoElem).attr("data-promo-position"),
+                    label: $(promoElem).attr("data-promo-position")
+                };
+            }
+            else {
+                if ($(element).attr("data-promo-id") != null) {
+                    return {
+                        destinationUrl: $(element).attr("data-promo-destination-Url"),
+                        id: $(element).attr("data-promo-id"),
+                        name: $(element).attr("data-promo-name"),
+                        creative: $(element).attr("data-promo-creative"),
+                        position: $(element).attr("data-promo-position"),
+                        gaTracking: $(element).attr("data-ga-tracking"),
+                        label: $(element).attr("data-promo-position")
+                    };
+                }
+                else { return null; }
+            }
+            return null;
+        }
+
+        function handleGridTileImpressionData(tempPromo, elem) {
+            var tileDivs = $(elem).closest("[data-tag=tile-internalPromotion]");
+            if (tileDivs != null && tileDivs.length > 0) {
+                tempPromo.destinationUrl = $(tileDivs[0]).attr("data-promo-destination-url");
+                tempPromo.creative = $(tileDivs[0]).attr("data-promo-creative");
+                var promoIndex = $(tileDivs[0]).attr("data-promo-index");
+                if (promoIndex != null && typeof (promoIndex) != "undefined") {
+                    tempPromo.position = tempPromo.position + " | " + promoIndex;
+                }
+            }
+            return tempPromo;
+        }
+
+       
+      
+    }
+
+    // define the INDOCHINO namespace
+    if (typeof(window.indo) === 'undefined') {
+        window.indo = {};
+    }
+
+    // Util will be an instance of the Utility class
+    indo.Util = new Utility();
+
+}());;
+/**
+ * @file imageHandler.js
+ * @desc Defines a Handler class for common image functions.
+ * @author Aneka Scott
+ * @copyright © INDOCHINO 2020
+ */
+(function () {
+    function EcommImageHandler() {
+        const desktopWidth = 1024;
+        var self = this;
+        this.ImageArea = {
+            IMAGE_AREA_PDP_MAIN: "PDP_MAIN",
+            IMAGE_AREA_PLP_ITEM: "PLP_ITEM",
+            IMAGE_WEDDING_OUTFIT_PLP: "IMAGE_WEDDING_OUTFIT_PLP",
+            PLP_QUICK_VIEW: "PLP_QUICK_VIEW",
+            PDP_RECOMMENDATION: "PDP_RECOMMENDATION",
+            PLP_ITEM_TAILORSKIT: "PLP_ITEM_TAILORSKIT",
+            GENERIC_THUMB: "GENERIC_THUMB",
+            SITE_SEARCH_THUMB: "SITE_SEARCH_THUMB",
+            CUSTOMIZATION_OPTION_MATERIALS: "CUSTOMIZATION_OPTION_MATERIALS",
+            WEDDING_DEFAULT_GALLERY_MAIN: "WEDDING_DEFAULT_GALLERY_MAIN"
+        };
+        this.AmpTemplateVariable = "?$";
+
+        this.getImageTransformationTemplate = function (productType, areaType) {
+            if (productType != null) {
+                productType = productType.split(" ").join("").toLowerCase();
+            } 
+
+            if (productType == 'pantswomen')
+            {
+                productType = 'pants_women'
+            }
+
+            if (areaType == this.ImageArea.GENERIC_THUMB || areaType == this.ImageArea.SITE_SEARCH_THUMB) {
+                if (productType != null && productType != "") {
+                    if (productType == "outerwear" || productType == "suit" || productType == "suitwomen" || productType == "trenchcoat") {
+                        return "suit-thumb";
+                    }
+                    else { return (productType + "-thumb") };
+                }
+                else {
+                    return "product-thumb";
+                }
+            }
+            else if (areaType == this.ImageArea.IMAGE_AREA_PLP_ITEM
+                || areaType == this.ImageArea.IMAGE_WEDDING_OUTFIT_PLP
+                || areaType == this.ImageArea.PDP_RECOMMENDATION
+                ) {
+                if (productType == "suit" 
+                    || productType == "suitwomen"
+                    || productType == "outerwear"
+                    || productType == "trenchcoat") {
+                    return ("suit" + "-plp");
+                } else if (productType == "fabric") {
+                    return "plp-fabric";
+                } else if (productType == "pants" || productType == "pants_women"
+                    || productType == "chinos") {
+                    return "pants-plp";
+                }
+                else {
+                    return (productType + "-plp");
+                }
+            }
+            else if (areaType == this.ImageArea.PLP_ITEM_TAILORSKIT) {
+                if (productType == "suit" || productType == "suitwomen"
+                || productType == "outerwear"
+                || productType == "trenchcoat") {
+                    return ("suit" + "-tailorskit");
+                }
+                else return (productType + "-tailorskit");
+            }
+            else if (areaType == this.ImageArea.PLP_QUICK_VIEW) {
+                if (productType == "outerwear" || productType == "trenchcoat") {
+                    productType = "outerwear";
+                } else if (productType == "casual_shirt") {
+                    productType = "suit";
+                }
+                return (productType + "-pdp-gallery0-desk");
+            }
+            else if (areaType == this.ImageArea.CUSTOMIZATION_OPTION_MATERIALS) {
+                var viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+                 
+                if (viewportWidth > desktopWidth) {
+                    return "customizations-thumb-desktop";
+                } else {
+                    return "customizations-thumb-mobile";
+                }
+            }
+            else if (areaType == this.ImageArea.WEDDING_DEFAULT_GALLERY_MAIN) {
+                return "product-pdp-gallery-default";
+            }
+            return "";
+        }
+    }
+
+    // define the INDOCHINO namespace
+    if (typeof (window.indo) === 'undefined') {
+        window.indo = {};
+    }
+    indo.EcommImageHandler = new EcommImageHandler();
+}());;
+/**
+ * @file global.js
+ * @desc Defines global functions and initializes global modules
+ * @author Jackie Hii
+ * @copyright © INDOCHINO 2016
+ */
+(function() {
+    var viewMeasLinks = $('.view-measurements');
+    var viewCstmLinks = $('.view-customizations');
+    var viewSubscribeLinks = $('.view-subscribe');
+    var customizeBtn = $('#customize-btn');
+    var bannerSection = $(".fusion-header");
+    var promoDiv = $("[data-tag=internalPromotion]");
+    var amplienceLinkClass = "link";
+
+    var data_ga_tracking = "data-ga-tracking";
+
+    var tuxedoBtn = $('#tuxedo-btn');
+
+  
+    
+    
+    /*-----------------------------------------------------------------*
+     *                      GLOBAL EVENT BINDING                       *
+     *-----------------------------------------------------------------*/
+    
+    viewMeasLinks.on('click', displayMeasurements);
+    viewCstmLinks.on('click', { hasExisting: true }, displayCustomizeOverlay);
+    viewSubscribeLinks.on('click', displayNewsletterOverlay);
+    customizeBtn.on('click', { hasExisting: false }, displayCustomizeOverlay);
+    tuxedoBtn.on('click', { hasExisting: false }, displayCustomizeOverlay);
+    bannerSection.on('click', bannerSectionClicked);
+    var bodyElem = document.getElementsByTagName("body");
+    if (bodyElem.length > 0) {
+        var previewAttr = bodyElem[0].getAttribute("data-preview"); 
+        if (typeof (previewAttr) == "undefinded" || previewAttr == null) {
+            $(document).on('ready', function () { indo.Util.internalCampaignOnLoadAmplience(null);});
+            $(window).on('load resize scroll', internalCampaignImpressionsOnLoadOrScroll);
+        }
+    }
+    $(window).on('load', ipadZoomHack);
+
+    $(document).ready(function () {
+        viewCartEvent();
+        purchaseEvent();
+    });
+    
+
+    /*-----------------------------------------------------------------*
+     *                        GLOBAL FUNCTIONS                         *
+     *-----------------------------------------------------------------*/
+
+    
+
+    /**
+     * Display the Measurements component.
+     * @param {event} e
+     * @return {void}
+     * @method displayMeasurements
+     */
+    function displayMeasurements(e) {
+        e.preventDefault();
+
+        var measurementSystem = $(this).data('measurement-system');
+
+        indo.Util.showMeasurements(measurementSystem);
+    }
+
+    /**
+     * Display the Customize component nested inside an Overlay.
+     * @param {event} e
+     * @return {void}
+     * @method displayCustomizeOverlay
+     */
+    function displayCustomizeOverlay(e) {
+        e.preventDefault();
+
+        var formAddToBag = $('#formAddToBag');
+        var productId = formAddToBag.find('[name="productId"]').val();
+        var isMto = formAddToBag.find('[name="isMto"]').val() === 'True';
+        var sizeId = null;
+        var size = null;
+        if (isMto)
+        {
+            sizeId = parseInt(formAddToBag.find('[name="sizeId"]').val());
+            size = formAddToBag.find('[name="size"]').val();
+
+            var _errorAlertMsg = $('#alertError');
+            var _errorText1 = $("#alertErrorText1");
+            var _errorText2 = $("#alertErrorText2");
+            _errorAlertMsg.hide();
+            _errorText1.html($("#genericError1").val());
+            _errorText2.html($("#genericError2").val());
+
+            if (!sizeId)
+            {
+                _errorText1.html("You must select an available size");
+                _errorText2.html("");
+                _errorAlertMsg.show();
+                return;
+            }
+        }
+
+        var dataUrl      = $(this).data('url'),
+            hideUpsell   = $(this).data('hide-upsell') === 1,
+            monogramOnly = $(this).data('monogram-only') === 1,
+            liningOnly = $(this).data('lining-only') === 1
+            ;
+
+        indo.Util.showCustomize(dataUrl, hideUpsell, monogramOnly, { sizeId: sizeId, size: size, liningOnly: liningOnly });
+    }
+
+    /**
+     * Display the Newsletter Overlay component.
+     * @param {event} e
+     * @return {void}
+     * @method displayNewsletterOverlay
+     */
+    function displayNewsletterOverlay(e) {
+        e.preventDefault();
+        
+        var title = $(this).data('title');
+        var subtitle = $(this).data('subtitle');
+        var bodyText = $(this).data('bodyText');
+        var interestPoint = $(this).data('interest-point');
+
+        indo.Util.showNewsletterOverlay(title, subtitle, bodyText, interestPoint);
+    }
+
+    /**
+     * Track BetterCMS banners as internal promotions in Google Analytics.
+     * @param {event} e
+     * @return {void}
+     * @method bannerSectionClicked
+     */
+    function bannerSectionClicked(e) {
+        var bannerDataSelector = $("#bannerGtmData"); 
+        if (!bannerDataSelector.length) return;
+        var bannerGtm = bannerDataSelector.val();
+        if (bannerGtm !== null && bannerGtm !== '') {
+            indo.Util.trackPromotionClick(JSON.parse(bannerGtm));
+        }
+    }
+
+    function getCampaignData(element) {
+        var promoIdArr = $(element).find('[data-promo-id]');
+        
+        if (promoIdArr.length > 0) {
+            var promoElem = $(promoIdArr[0]);
+            return {
+                destinationUrl: $(promoElem).attr("data-promo-destination-Url"),
+                id: $(promoElem).attr("data-promo-id"),
+                name: $(promoElem).attr("data-promo-name"),
+                creative: $(promoElem).attr("data-promo-creative"),
+                position: $(promoElem).attr("data-promo-position"),
+                label: $(promoElem).attr("data-promo-position")
+            };
+        }
+        else {
+            if ($(element).attr("data-promo-id") != null) {
+                return {
+                    destinationUrl: $(element).attr("data-promo-destination-Url"),
+                    id: $(element).attr("data-promo-id"),
+                    name: $(element).attr("data-promo-name"),
+                    creative: $(element).attr("data-promo-creative"),
+                    position: $(element).attr("data-promo-position"),
+                    gaTracking: $(element).attr("data-ga-tracking"),
+                    label: $(element).attr("data-promo-position")
+                };
+            }
+            else { return null; }
+        }
+        return null;
+    }
+
+    function internalCampaignOnLoad() {
+        var promoDiv = $("[data-tag=internalPromotion]");
+        if (promoDiv.length > 0) {
+            for (var index = 0; index < promoDiv.length; index++) {
+                var promoObj = getCampaignData($(promoDiv[index]));
+                if (promoObj !== null) {
+                    $(promoDiv[index]).on('click', function () {
+                        var tempPromo = getCampaignData($(this));
+                        if (tempPromo !== null) {
+                            indo.Util.trackPromotionClick(tempPromo);
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+
+    function handleGridTileImpressionData(tempPromo, elem) {
+        var tileDivs = $(elem).closest("[data-tag=tile-internalPromotion]");
+        if (tileDivs != null && tileDivs.length > 0) {
+            tempPromo.destinationUrl = $(tileDivs[0]).attr("data-promo-destination-url");
+            tempPromo.creative = $(tileDivs[0]).attr("data-promo-creative");
+            var promoIndex = $(tileDivs[0]).attr("data-promo-index");
+            if (promoIndex != null && typeof (promoIndex) != "undefined") {
+                tempPromo.position = tempPromo.position + " | " + promoIndex;
+            }
+        }
+        return tempPromo;
+    }
+
+   
+    function internalCampaignImpressionsOnLoadOrScroll() {
+        //we need to check for the elements in the function because on subsequent loads we have more elements appended
+        var promoDiv = $("[data-tag=internalPromotion]");
+        if (promoDiv.length > 0) {
+            var promoArr = [];
+            for (var index = 0; index < promoDiv.length; index++) {
+                //lets check here if we have a grid or not
+                var tileDivs = $(promoDiv[index]).find("[data-tag=tile-internalPromotion]");
+                if (tileDivs.length > 0)
+                {
+                    //for each tile we are sending separate view impression push
+                    var promoObj = getCampaignData($(promoDiv[index]));
+                    if (promoObj != null) {
+                        for (var ti = 0; ti < tileDivs.length; ti++) {
+                            if (indo.Util.isInViewport(tileDivs[ti])) {
+                                var tilePromoArr = [];
+                                var copyPromoObj = {
+                                    destinationUrl: $(tileDivs[ti]).attr("data-promo-destination-url"),
+                                    id: promoObj.id,
+                                    name: promoObj.name,
+                                    creative: $(tileDivs[ti]).attr("data-promo-creative"),
+                                    position: promoObj.position,
+                                    gaTracking: promoObj.gaTracking,
+                                    label: promoObj.label
+                                };
+                                var promoIndex = $(tileDivs[ti]).attr("data-promo-index");
+                                if (promoIndex != null && typeof(promoIndex) != "undefined") {
+                                    copyPromoObj.position = copyPromoObj.position + " | " + promoIndex;
+                                }
+                                //we will be firing tag on each
+                                tilePromoArr.push(copyPromoObj);
+                                indo.Util.trackPromotionImpressions(tilePromoArr, true);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    var promoObj = getCampaignData($(promoDiv[index]));
+                    if ((promoObj !== null) && (indo.Util.isInViewport(promoDiv[index]))) {
+                        promoArr.push(promoObj);
+                    }
+                }
+            }
+
+            if (promoArr.length > 0) {
+                indo.Util.trackPromotionImpressions(promoArr, true);
+            }
+        }
+    }
+
+
+    //Datalayer push event for View Cart
+    function viewCartEvent() {
+        setTimeout(function () {
+            if (window.location.pathname === '/basket') {                
+                var datalayerArr = window.dataLayer;
+                var viewCartEventExists = false;
+                for (var d = 0; d < datalayerArr.length; d++) {
+                    if (datalayerArr[d].event === "view_cart") {
+                        viewCartEventExists = true;
+                    }
+                }
+
+                // Push the event only once
+                if (!viewCartEventExists) {
+                    var currentPageUrl = window.location.href;
+                    var customerId = window.dataLayer[2].customer.id;
+                    var user_id = '';
+                    var user_status = '';
+                    if (customerId !== undefined && customerId !== null && customerId !== '0') {
+                        user_status = 'Logged in';
+                        user_id = customerId;
+                    } else {
+                        user_status = 'Not logged in';
+                        user_id = '0';
+                    }
+
+                    var itemsArr = [];
+                    if (document.getElementsByClassName("shoppingBagComponentV2__itemWrapper").length > 0) {
+                        var allItemsDiv = document.getElementsByClassName("shoppingBagComponentV2__itemWrapper")[0].querySelectorAll(".shoppingBagComponentV2__item");
+                        if (allItemsDiv.length > 0) {
+                            for (var i = 0; i < allItemsDiv.length; i++) {
+                                var imgUrl = allItemsDiv[i].getElementsByClassName("shoppingBagComponentV2__item__img")[0].src;
+                                var getLastPart = imgUrl.substring(imgUrl.lastIndexOf('/') + 1);
+                                var getItemIdPart = getLastPart.split('?')[0];
+                                var itemId = getItemIdPart.split("_")[0];
+
+                                var itemName = allItemsDiv[i].getElementsByClassName("shoppingBagComponentV2__item__name")[0].innerHTML;
+                                
+                                if (allItemsDiv[i].getElementsByClassName("shoppingBagComponentV2__item__price ")[0].getElementsByTagName('span').length > 0) {
+                                    var itemPriceText = allItemsDiv[i].getElementsByClassName("shoppingBagComponentV2__item__price ")[0].getElementsByTagName('span')[0].innerHTML;
+                                } else if (allItemsDiv[i].getElementsByClassName("sale-price").length > 0) {
+                                    var itemPriceText = allItemsDiv[i].getElementsByClassName("sale-price")[0].getElementsByTagName('span')[0].innerHTML;
+                                }
+
+                                var itemPrice = itemPriceText.split(" ")[1].slice(1);
+                                var itemCurrency = itemPriceText.split(" ")[0];
+
+                                var itemQuantity = '1';
+                                if (allItemsDiv[i].getElementsByClassName("shoppingBagComponentV2__quantityModifier__num").length > 0) {
+                                    itemQuantity = allItemsDiv[i].getElementsByClassName("shoppingBagComponentV2__quantityModifier__num")[0].innerHTML;
+                                } 
+
+                                itemsArr.push({
+                                    'item_id': itemId,
+                                    'item_name': itemName,
+                                    'price': itemPrice,
+                                    'currency': itemCurrency,
+                                    'quantity': itemQuantity
+                                })
+                            }
+                        }
+                    }    
+
+                    if (document.getElementsByClassName("measurementcontainer").length > 0) {
+                        var checkItemPrice = document.querySelector('.measurementcontainer').querySelector('.currvalue').innerHTML;
+                        var itemName = document.querySelector('.measurementcontainer').querySelector('.boldtext').innerHTML;
+                        var itemPrice = "";
+                        var itemCurrency = document.getElementById("currentCurrency").value;
+                        if (checkItemPrice === 'Free') {
+                            itemPrice = "0";
+                        } else {
+                            var itemPriceText = checkItemPrice.split(" ");
+                            itemPrice = itemPriceText[1].slice(1);
+                            itemCurrency = itemPriceText[0];
+                        }
+                        
+                        itemsArr.push({
+                            'item_id': "15016474",
+                            'item_name': itemName,
+                            'price': itemPrice,
+                            'currency': itemCurrency,
+                            'quantity': "1"
+                        })
+                    }
+
+                    window.dataLayer = window.dataLayer || [];
+                    window.dataLayer.push({
+                        'event': 'view_cart',
+                        'ecommerce': {
+                            'items': itemsArr,
+                            'page': currentPageUrl,
+                            'user_id': user_id,
+                            'user_login_status': user_status
+                        }
+                    });
+                }
+            }
+        }, 10000);
+    }
+
+    // Datalayer push event when order is placed successfully
+    function purchaseEvent() {
+        setTimeout(function () {
+            if (window.location.pathname === '/shoppingbag/paid') {
+                var customerId = '';
+                var transactionId = '';
+                var transactionAffiliation = '';
+                var couponCode = '';
+                var user_id = '';
+                var user_status = '';
+                var totalAmount = '';
+                var currentPageUrl = window.location.href;
+                var datalayerArr = window.dataLayer;
+                var purchaseEventExists = false;
+                for (var d = 0; d < datalayerArr.length; d++) {
+                    if (datalayerArr[d].event === "purchase") {
+                        purchaseEventExists = true;
+                    }
+                    if (datalayerArr[d].page_type === "Paid") {
+                        var ordersArr = datalayerArr[d].order;
+                        customerId = datalayerArr[d].customer.id;
+                        transactionId = datalayerArr[d].transaction_id;
+                        transactionAffiliation = datalayerArr[d].transactionAffiliation;
+                        couponCode = ordersArr.coupon_key;
+                    }
+                }
+
+                // Push the event only once
+                if (!purchaseEventExists) {                    
+                    if (customerId !== undefined && customerId !== null && customerId !== '0') {
+                        user_status = 'Logged in';
+                        user_id = customerId;
+                    } else {
+                        user_status = 'Not logged in';
+                        user_id = '0';
+                    }
+
+                    if (typeof couponCode === "undefined") {
+                        couponCode = '';
+                    }
+
+                    var itemsArr = [];
+                    var allProductsArr = ordersArr.items;
+                    if (allProductsArr.length > 0) {
+                        for (var i = 0; i < allProductsArr.length; i++) {
+                            var itemId = allProductsArr[i].product.id;
+                            var itemName = allProductsArr[i].product.label;
+                            var itemCategory = allProductsArr[i].product.category;
+                            var itemQuantity = allProductsArr[i].quantity;
+                            var itemPrice = allProductsArr[i].price;
+
+                            itemsArr.push({
+                                'item_id': itemId,
+                                'item_name': itemName,
+                                'item_category': itemCategory,
+                                'quantity': itemQuantity.toString(),
+                                'price': itemPrice.toString(),
+                            })
+                        }
+                    }
+                    totalAmount = document.getElementById("total-amount").getAttribute('data-total');
+
+                    var fbcGuidId = null;
+                    var fbcElemt = $('#fbcRandomGuidId');
+                    if (fbcElemt && fbcElemt !== undefined)
+                    {
+                        fbcGuidId = fbcElemt.val();
+                    }
+
+                    var event = {};
+                    var fbcExternalId = document.getElementById("fbcExternalId");
+                    if (fbcExternalId)
+                    {
+                        event.external_id = fbcExternalId.value;
+                    }
+
+                    var fbcEventId = document.getElementById("fbcEventId");
+                    if (fbcEventId)
+                    {
+                        event.event_id = fbcEventId.value + "_" + fbcGuidId;
+                    }
+                    else
+                    {
+                        var fbcOrderId = document.getElementById("orderId");
+                        if (fbcOrderId)
+                        {
+                            event.event_id = "o_" + fbcOrderId.value + "_" + fbcGuidId;
+                        }
+                    }
+
+                    window.dataLayer = window.dataLayer || [];
+                    window.dataLayer.push({
+                        'event': 'purchase',
+                        'ecommerce': {
+                            'transaction_id': transactionId,
+                            'affiliation': transactionAffiliation,
+                            'coupon': couponCode,
+                            'value': totalAmount,
+                            'currency': ordersArr.currencyCode,
+                            'tax': ordersArr.tax_amount.toString(),
+                            'shipping': ordersArr.shipping_amount.toString(),
+                            'items': itemsArr,
+                            'page': currentPageUrl,
+                            'user_id': user_id,
+                            'user_login_status': user_status,
+                            'event_id': event.event_id,
+                            'external_id': event.external_id
+                        }
+                    });
+                }
+            }
+        }, 10000);
+    }
+
+    //Datalayer push for custom events
+    $(".linkstonav").click(function () {
+        //Datalayer push event for Header Click
+        var currentPageUrl = window.location.href;
+        var customerId = window.dataLayer[2].customer.id;
+        var user_id = '';
+        var user_status = '';
+        var header_category = '';
+        var header_subcategory = '';
+        if (customerId !== undefined && customerId !== null && customerId !== '0') {
+            user_status = 'Logged in';
+            user_id = customerId;
+        } else {
+            user_status = 'Not logged in';
+            user_id = '0';
+        }
+
+        header_category = $(this).closest("div.dropDownSubMenu").prev("a.dropDownMenu__link").text();
+        if ($(this).closest("ul").prev(".contentText").length > 0) {
+            header_subcategory = $(this).closest("ul").prev(".contentText").text();
+        }        
+
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+            'event': 'header_click',
+            'page': currentPageUrl,
+            'user_id': user_id,
+            'user_login_status': user_status,
+            'header_category': header_category,
+            'header_subcategory': header_subcategory
+        });
+
+        //Datalayer push event when user clicks on Visit a Showroom link from the header menu
+        if ($(this).text() === 'Visit a Showoom') {
+            var datalayerArr = window.dataLayer;
+            var visitShowroomEventExists = false;
+            for (var d = 0; d < datalayerArr.length; d++) {
+                if (datalayerArr[d].event === "visit_a_showroom") {
+                    visitShowroomEventExists = true;
+                }
+            }
+
+            // Push the event only once
+            if (!visitShowroomEventExists) {
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({
+                    'event': 'visit_a_showroom',
+                    'page': currentPageUrl,
+                    'user_id': user_id,
+                    'user_login_status': user_status,
+                    'location_of_click': 'navigation_menu'
+                });
+            }
+        }
+    });
+
+    //Datalayer push event when user clicks on Visit a Showroom link from top-right of the website
+    $(".headerSubNav__link").click(function () {
+        if ($(this).text() === 'Visit a showroom') {
+            var datalayerArr = window.dataLayer;
+            var visitShowroomEventExists = false;
+            for (var d = 0; d < datalayerArr.length; d++) {
+                if (datalayerArr[d].event === "visit_a_showroom") {
+                    visitShowroomEventExists = true;
+                }
+            }
+
+            var currentPageUrl = window.location.href;
+            var customerId = window.dataLayer[2].customer.id;
+            var user_id = '';
+            var user_status = '';
+            if (customerId !== undefined && customerId !== null && customerId !== '0') {
+                user_status = 'Logged in';
+                user_id = customerId;
+            } else {
+                user_status = 'Not logged in';
+                user_id = '0';
+            }
+
+            // Push the event only once
+            if (!visitShowroomEventExists) {
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({
+                    'event': 'visit_a_showroom',
+                    'page': currentPageUrl,
+                    'user_id': user_id,
+                    'user_login_status': user_status,
+                    'location_of_click': 'page_header'
+                });
+            }
+        }
+    });
+
+    //Datalayer push event when user clicks on social icons in footer
+    $(".footerSocial__link").click(function () {
+        var currentPageUrl = window.location.href;
+        var customerId = window.dataLayer[2].customer.id;
+        var user_id = '';
+        var user_status = '';
+        if (customerId !== undefined && customerId !== null && customerId !== '0') {
+            user_status = 'Logged in';
+            user_id = customerId;
+        } else {
+            user_status = 'Not logged in';
+            user_id = '0';
+        }
+
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+            'event': 'social_share',
+            'page': currentPageUrl,
+            'user_id': user_id,
+            'user_login_status': user_status
+        });
+    });
+
+    /*
+    *  "New" iPad zoom hack
+    *
+    *  Rhian Watkins:
+    *  This is a dirty hack for ECOMM-2841 
+    *  For some reason the ipad that won't identify as mobile, also will randomly zooms in on page load
+    *  this fix just adds a 1x1px div which will force a page redraw and make it zoom out
+    */  
+    function ipadZoomHack() {
+        if ($("body.desktop").length > 0 && $(window).width() == 1024){
+            setTimeout(()=>{
+                $("body").append("<div id='zoomFixHack' style='display: block;width: 1px;height: 1px;'></div>")
+                setTimeout(()=>{
+                    $("#zoomFixHack").remove();
+                }, 500)
+            }, 500)
+        }
+    }
+}());;
+!function(n,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t():"function"==typeof define&&define.amd?define(t):(n="undefined"!=typeof globalThis?globalThis:n||self).LazyLoad=t()}(this,(function(){"use strict";function n(){return n=Object.assign||function(n){for(var t=1;t<arguments.length;t++){var e=arguments[t];for(var i in e)Object.prototype.hasOwnProperty.call(e,i)&&(n[i]=e[i])}return n},n.apply(this,arguments)}var t="undefined"!=typeof window,e=t&&!("onscroll"in window)||"undefined"!=typeof navigator&&/(gle|ing|ro)bot|crawl|spider/i.test(navigator.userAgent),i=t&&"IntersectionObserver"in window,o=t&&"classList"in document.createElement("p"),a=t&&window.devicePixelRatio>1,r={elements_selector:".lazy",container:e||t?document:null,threshold:300,thresholds:null,data_src:"src",data_srcset:"srcset",data_sizes:"sizes",data_bg:"bg",data_bg_hidpi:"bg-hidpi",data_bg_multi:"bg-multi",data_bg_multi_hidpi:"bg-multi-hidpi",data_poster:"poster",class_applied:"applied",class_loading:"loading",class_loaded:"loaded",class_error:"error",class_entered:"entered",class_exited:"exited",unobserve_completed:!0,unobserve_entered:!1,cancel_on_exit:!0,callback_enter:null,callback_exit:null,callback_applied:null,callback_loading:null,callback_loaded:null,callback_error:null,callback_finish:null,callback_cancel:null,use_native:!1},c=function(t){return n({},r,t)},u=function(n,t){var e,i="LazyLoad::Initialized",o=new n(t);try{e=new CustomEvent(i,{detail:{instance:o}})}catch(n){(e=document.createEvent("CustomEvent")).initCustomEvent(i,!1,!1,{instance:o})}window.dispatchEvent(e)},l="src",s="srcset",f="sizes",d="poster",_="llOriginalAttrs",g="loading",v="loaded",b="applied",p="error",h="native",m="data-",E="ll-status",I=function(n,t){return n.getAttribute(m+t)},y=function(n){return I(n,E)},A=function(n,t){return function(n,t,e){var i="data-ll-status";null!==e?n.setAttribute(i,e):n.removeAttribute(i)}(n,0,t)},k=function(n){return A(n,null)},L=function(n){return null===y(n)},w=function(n){return y(n)===h},x=[g,v,b,p],O=function(n,t,e,i){n&&(void 0===i?void 0===e?n(t):n(t,e):n(t,e,i))},N=function(n,t){o?n.classList.add(t):n.className+=(n.className?" ":"")+t},C=function(n,t){o?n.classList.remove(t):n.className=n.className.replace(new RegExp("(^|\\s+)"+t+"(\\s+|$)")," ").replace(/^\s+/,"").replace(/\s+$/,"")},M=function(n){return n.llTempImage},z=function(n,t){if(t){var e=t._observer;e&&e.unobserve(n)}},R=function(n,t){n&&(n.loadingCount+=t)},T=function(n,t){n&&(n.toLoadCount=t)},G=function(n){for(var t,e=[],i=0;t=n.children[i];i+=1)"SOURCE"===t.tagName&&e.push(t);return e},D=function(n,t){var e=n.parentNode;e&&"PICTURE"===e.tagName&&G(e).forEach(t)},V=function(n,t){G(n).forEach(t)},F=[l],j=[l,d],P=[l,s,f],S=function(n){return!!n[_]},U=function(n){return n[_]},$=function(n){return delete n[_]},q=function(n,t){if(!S(n)){var e={};t.forEach((function(t){e[t]=n.getAttribute(t)})),n[_]=e}},H=function(n,t){if(S(n)){var e=U(n);t.forEach((function(t){!function(n,t,e){e?n.setAttribute(t,e):n.removeAttribute(t)}(n,t,e[t])}))}},B=function(n,t,e){N(n,t.class_loading),A(n,g),e&&(R(e,1),O(t.callback_loading,n,e))},J=function(n,t,e){e&&n.setAttribute(t,e)},K=function(n,t){J(n,f,I(n,t.data_sizes)),J(n,s,I(n,t.data_srcset)),J(n,l,I(n,t.data_src))},Q={IMG:function(n,t){D(n,(function(n){q(n,P),K(n,t)})),q(n,P),K(n,t)},IFRAME:function(n,t){q(n,F),J(n,l,I(n,t.data_src))},VIDEO:function(n,t){V(n,(function(n){q(n,F),J(n,l,I(n,t.data_src))})),q(n,j),J(n,d,I(n,t.data_poster)),J(n,l,I(n,t.data_src)),n.load()}},W=["IMG","IFRAME","VIDEO"],X=function(n,t){!t||function(n){return n.loadingCount>0}(t)||function(n){return n.toLoadCount>0}(t)||O(n.callback_finish,t)},Y=function(n,t,e){n.addEventListener(t,e),n.llEvLisnrs[t]=e},Z=function(n,t,e){n.removeEventListener(t,e)},nn=function(n){return!!n.llEvLisnrs},tn=function(n){if(nn(n)){var t=n.llEvLisnrs;for(var e in t){var i=t[e];Z(n,e,i)}delete n.llEvLisnrs}},en=function(n,t,e){!function(n){delete n.llTempImage}(n),R(e,-1),function(n){n&&(n.toLoadCount-=1)}(e),C(n,t.class_loading),t.unobserve_completed&&z(n,e)},on=function(n,t,e){var i=M(n)||n;nn(i)||function(n,t,e){nn(n)||(n.llEvLisnrs={});var i="VIDEO"===n.tagName?"loadeddata":"load";Y(n,i,t),Y(n,"error",e)}(i,(function(o){!function(n,t,e,i){var o=w(t);en(t,e,i),N(t,e.class_loaded),A(t,v),O(e.callback_loaded,t,i),o||X(e,i)}(0,n,t,e),tn(i)}),(function(o){!function(n,t,e,i){var o=w(t);en(t,e,i),N(t,e.class_error),A(t,p),O(e.callback_error,t,i),o||X(e,i)}(0,n,t,e),tn(i)}))},an=function(n,t,e){!function(n){n.llTempImage=document.createElement("IMG")}(n),on(n,t,e),function(n){S(n)||(n[_]={backgroundImage:n.style.backgroundImage})}(n),function(n,t,e){var i=I(n,t.data_bg),o=I(n,t.data_bg_hidpi),r=a&&o?o:i;r&&(n.style.backgroundImage='url("'.concat(r,'")'),M(n).setAttribute(l,r),B(n,t,e))}(n,t,e),function(n,t,e){var i=I(n,t.data_bg_multi),o=I(n,t.data_bg_multi_hidpi),r=a&&o?o:i;r&&(n.style.backgroundImage=r,function(n,t,e){N(n,t.class_applied),A(n,b),e&&(t.unobserve_completed&&z(n,t),O(t.callback_applied,n,e))}(n,t,e))}(n,t,e)},rn=function(n,t,e){!function(n){return W.indexOf(n.tagName)>-1}(n)?an(n,t,e):function(n,t,e){on(n,t,e),function(n,t,e){var i=Q[n.tagName];i&&(i(n,t),B(n,t,e))}(n,t,e)}(n,t,e)},cn=function(n){n.removeAttribute(l),n.removeAttribute(s),n.removeAttribute(f)},un=function(n){D(n,(function(n){H(n,P)})),H(n,P)},ln={IMG:un,IFRAME:function(n){H(n,F)},VIDEO:function(n){V(n,(function(n){H(n,F)})),H(n,j),n.load()}},sn=function(n,t){(function(n){var t=ln[n.tagName];t?t(n):function(n){if(S(n)){var t=U(n);n.style.backgroundImage=t.backgroundImage}}(n)})(n),function(n,t){L(n)||w(n)||(C(n,t.class_entered),C(n,t.class_exited),C(n,t.class_applied),C(n,t.class_loading),C(n,t.class_loaded),C(n,t.class_error))}(n,t),k(n),$(n)},fn=["IMG","IFRAME","VIDEO"],dn=function(n){return n.use_native&&"loading"in HTMLImageElement.prototype},_n=function(n,t,e){n.forEach((function(n){return function(n){return n.isIntersecting||n.intersectionRatio>0}(n)?function(n,t,e,i){var o=function(n){return x.indexOf(y(n))>=0}(n);A(n,"entered"),N(n,e.class_entered),C(n,e.class_exited),function(n,t,e){t.unobserve_entered&&z(n,e)}(n,e,i),O(e.callback_enter,n,t,i),o||rn(n,e,i)}(n.target,n,t,e):function(n,t,e,i){L(n)||(N(n,e.class_exited),function(n,t,e,i){e.cancel_on_exit&&function(n){return y(n)===g}(n)&&"IMG"===n.tagName&&(tn(n),function(n){D(n,(function(n){cn(n)})),cn(n)}(n),un(n),C(n,e.class_loading),R(i,-1),k(n),O(e.callback_cancel,n,t,i))}(n,t,e,i),O(e.callback_exit,n,t,i))}(n.target,n,t,e)}))},gn=function(n){return Array.prototype.slice.call(n)},vn=function(n){return n.container.querySelectorAll(n.elements_selector)},bn=function(n){return function(n){return y(n)===p}(n)},pn=function(n,t){return function(n){return gn(n).filter(L)}(n||vn(t))},hn=function(n,e){var o=c(n);this._settings=o,this.loadingCount=0,function(n,t){i&&!dn(n)&&(t._observer=new IntersectionObserver((function(e){_n(e,n,t)}),function(n){return{root:n.container===document?null:n.container,rootMargin:n.thresholds||n.threshold+"px"}}(n)))}(o,this),function(n,e){t&&window.addEventListener("online",(function(){!function(n,t){var e;(e=vn(n),gn(e).filter(bn)).forEach((function(t){C(t,n.class_error),k(t)})),t.update()}(n,e)}))}(o,this),this.update(e)};return hn.prototype={update:function(n){var t,o,a=this._settings,r=pn(n,a);T(this,r.length),!e&&i?dn(a)?function(n,t,e){n.forEach((function(n){-1!==fn.indexOf(n.tagName)&&function(n,t,e){n.setAttribute("loading","lazy"),on(n,t,e),function(n,t){var e=Q[n.tagName];e&&e(n,t)}(n,t),A(n,h)}(n,t,e)})),T(e,0)}(r,a,this):(o=r,function(n){n.disconnect()}(t=this._observer),function(n,t){t.forEach((function(t){n.observe(t)}))}(t,o)):this.loadAll(r)},destroy:function(){this._observer&&this._observer.disconnect(),vn(this._settings).forEach((function(n){$(n)})),delete this._observer,delete this._settings,delete this.loadingCount,delete this.toLoadCount},loadAll:function(n){var t=this,e=this._settings;pn(n,e).forEach((function(n){z(n,t),rn(n,e,t)}))},restoreAll:function(){var n=this._settings;vn(n).forEach((function(t){sn(t,n)}))}},hn.load=function(n,t){var e=c(t);rn(n,e)},hn.resetStatus=function(n){k(n)},t&&function(n,t){if(t)if(t.length)for(var e,i=0;e=t[i];i+=1)u(n,e);else u(n,t)}(hn,window.lazyLoadOptions),hn}));
+;
+'use strict';
+
+/**
+ * function that will add a style block that will hide the focus
+ * outlines while a user is using the mouse to navigate the application,
+ * once we detect that a user is using keyboard navigation (tab) we remove
+ * this style block so that the real focus outlines will be visible again.
+ */
+
+(function (root, factory) {
+  if(typeof define === 'function' && define.amd) { // eslint-disable-line
+    define(factory); // eslint-disable-line
+  } else if(typeof module === 'object' && module.exports) {
+    module.exports = factory();
+  } else {
+    root.smartOutline = factory();
+  }
+}(this, function() {
+
+  var defaultDomId = 'bbbx-a11y-fix';
+  var defaultHideFocusCSS = '*:focus {outline:0 !important;}::-moz-focus-inner{border:0;}';
+  var defaultHtmlClass = 'so-keyboard-user';
+  var options = null;
+
+  var KEYCODE_TAB = 9;
+  var KEYCODE_SPACE = 39;
+  var KEYCODE_LEFT = 37;
+  var KEYCODE_UP = 38;
+  var KEYCODE_RIGHT = 39;
+  var KEYCODE_DOWN = 40;
+
+  function ensureInitCalled() {
+    if(options === null)
+      throw new Error('Smart Outline is not initialized yet. Make sure to call `.init()` first.');
+  }
+
+  var smartOutline = {
+    getStyleEl: function() {
+      var opts = options || {};
+      return document.getElementById(opts.domId || defaultDomId);
+    },
+    setCSS: function(css) {
+      this.getStyleEl().innerHTML = css;
+    },
+    setHtmlClass: function(cssClass) {
+      document.documentElement.classList.add(cssClass);
+    },
+    removeHtmlClass: function(cssClass) {
+      document.documentElement.classList.remove(cssClass);
+    },
+    _clickListener: function() {
+      smartOutline.setCSS(options.hideFocusCSS);
+      smartOutline.removeHtmlClass(options.htmlClass);
+      window.removeEventListener('click', smartOutline._clickListener, false);
+      window.removeEventListener('mousemove', smartOutline._moveListener, false);
+      window.addEventListener('keydown', smartOutline._keyDownListener); // eslint-disable-line
+    },
+
+    _moveListener: function() {
+      smartOutline.setCSS(options.hideFocusCSS);
+      smartOutline.removeHtmlClass(options.htmlClass);
+      window.removeEventListener('click', smartOutline._clickListener, false);
+      window.removeEventListener('mousemove', smartOutline._moveListener, false);
+      window.addEventListener('keydown', smartOutline._keyDownListener); // eslint-disable-line
+    },
+
+    _keyDownListener: function(evt) {
+
+      // only remove the outline if the user is using one of the keyboard
+      // navigation keys
+      if(
+          evt.keyCode !== KEYCODE_TAB &&
+          evt.keyCode !== KEYCODE_SPACE &&
+          evt.keyCode !== KEYCODE_LEFT &&
+          evt.keyCode !== KEYCODE_RIGHT &&
+          evt.keyCode !== KEYCODE_UP &&
+          evt.keyCode !== KEYCODE_DOWN
+      )
+        return;
+
+      smartOutline.setCSS('');
+      smartOutline.setHtmlClass(options.htmlClass);
+      window.removeEventListener('keydown', smartOutline._keyDownListener, false);
+      window.addEventListener('click', smartOutline._clickListener);
+      window.addEventListener('click', smartOutline._moveListener); // it's not a mistake, should be on click, otherwise outline will disappear on mousemove
+    },
+
+    getOptions: function() {
+      ensureInitCalled();
+      return options;
+    },
+
+    isKeyboardUser: function() {
+      ensureInitCalled();
+      return this.getStyleEl().innerHTML === '';
+    },
+
+    isEnabled: function() {
+      var el = smartOutline.getStyleEl();
+      return el ? true : false;
+    },
+
+    init: function(userOptions) {
+
+      // create options were user options overwrites default options
+      userOptions = userOptions || {};
+      options = {
+        domId: userOptions.domId || defaultDomId,
+        hideFocusCSS: userOptions.hideFocusCSS || defaultHideFocusCSS,
+        htmlClass: userOptions.htmlClass || defaultHtmlClass
+      };
+
+      // only add style element if it doesn't exist yet
+      if(this.getStyleEl())
+        return this.getStyleEl();
+
+      // only bind the click handler if there is no a11y style element yet
+      window.addEventListener('click', smartOutline._clickListener);
+      window.addEventListener('mousemove', smartOutline._moveListener);
+
+      var head = document.head || document.getElementsByTagName('head')[0];
+      var style = document.createElement('style');
+      style.id = options.domId;
+      style.type = 'text/css';
+
+      if (userOptions.nonce)
+        style.nonce = userOptions.nonce;
+
+      if(!head)
+        return false;
+
+      return head.appendChild(style);
+    },
+
+    destroy: function() {
+      var el = smartOutline.getStyleEl();
+      if(el) {
+        var head = document.head || document.getElementsByTagName('head')[0];
+        head.removeChild(el);
+
+        options = null;
+        window.removeEventListener('keydown', smartOutline._keyDownListener, false);
+        window.removeEventListener('click', smartOutline._clickListener, false);
+        window.addEventListener('mousemove', smartOutline._clickListener, false);
+      }
+    }
+  };
+
+  return smartOutline;
+}));
+;

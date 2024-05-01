@@ -1,0 +1,1579 @@
+"use strict";
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _toArray(arr) { return _arrayWithHoles(arr) || _iterableToArray(arr) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+(function () {
+  var _experienceId;
+
+  var overrideIdPrefix = "zmags-overrideId";
+  var hashParamMap = getHashParamMap(); // build variables (injected by GitLab)
+
+  var defaultVersionId = "5ab40187";
+  var zmagsHost = "https://cas.zma.gs/static/";
+  var casBaseURI = "https://cas.zma.gs";
+  var creatorBaseURI = "https://c.zmags.com";
+  var imageApiBaseURI = "//img.creator-prod.zmags.com";
+  var connectAdapterBaseURI = "https://connect-adapter.api.zmags.com"; // experience selection and SSR variables (injected into template by Creator Settings API)
+
+  var ssrConfigStr = undefined || '{"companyId":"649d4cfbb6fc7c5ba761f411","contentSlotId":"9e585098-9ef7-4b5d-b799-71d80e747152","contentSchedule":{"defaultLanguage":"en-US","scheduledExperiences":[{"collectionId":"c23f71bd-ce09-8026-8003-9ae973111571","startTime":"2024-03-04T19:55:46.035Z","endTime":null,"weight":100,"experienceId":"C3_c23f71bd-ce09-8026-8003-9ae973111571_5f4f97ee-3ec8-80c4-8003-8dfc2f9e53d7","language":"en-US","threshold":1025},{"collectionId":"c23f71bd-ce09-8026-8003-9ae973111571","startTime":"2024-03-04T19:55:46.035Z","endTime":null,"weight":100,"experienceId":"C3_c23f71bd-ce09-8026-8003-9ae973111571_c734f115-f11f-803f-8003-9b07c607f58e","language":"en-US","threshold":429},{"collectionId":"c23f71bd-ce09-8026-8003-9ae973111571","startTime":"2024-03-04T19:55:46.035Z","endTime":null,"weight":100,"experienceId":"C3_c23f71bd-ce09-8026-8003-9ae973111571_c734f115-f11f-803f-8003-9b07c6809acb","language":"en-US","threshold":0},{"collectionId":"c23f71bd-ce09-8026-8003-9ae973111571","startTime":"2024-03-04T19:55:46.035Z","endTime":null,"weight":100,"experienceId":"C3_c23f71bd-ce09-8026-8003-9ae973111571_c734f115-f11f-803f-8003-9b07b74aa81c","language":"en-US","threshold":769}]}}';
+
+  var _ref = ssrConfigStr !== 'SSR_CONFIG_PLACEHOLDER' ? JSON.parse(ssrConfigStr || '{}') : {},
+      companyId = _ref.companyId,
+      experienceId = _ref.experienceId,
+      groupId = _ref.groupId,
+      containerId = _ref.containerId,
+      breakpointExperiences = _ref.breakpointExperiences,
+      contentSchedule = _ref.contentSchedule,
+      languageMappingFallback = _ref.languageMapping;
+
+  var host = zmagsHost && zmagsHost.endsWith("/") ? zmagsHost : "".concat(zmagsHost, "/");
+  var pendingBranches = 0;
+
+  if (undefined !== "local") {
+    host = "".concat(host).concat(defaultVersionId, "/");
+  }
+
+  var windowInitVersion = defaultVersionId ? "ZMAGS_Init_".concat(defaultVersionId) : "ZMAGS_Init";
+  var languageMapping = (contentSchedule === null || contentSchedule === void 0 ? void 0 : contentSchedule.languageMapping) || languageMappingFallback || defaultLanguageMapping();
+  var connectVars = {
+    experienceIdWithExecutionCount: '',
+    ssrBehaviorCacheProperty: '',
+    viewerDivClassName: '',
+    windowStateInitializedEvent: '',
+    behaviorExecutedEvent: '',
+    updatedWidgets: {},
+    behaviorsDataProperty: '',
+    overrideBehaviorsDataProperty: '',
+    ssrTempClass: ''
+  };
+  var stateJsonFetched = false;
+  var pendingActions = [];
+  var overrideIds = hashParamMap[overrideIdPrefix] || {}; // handle override which forces an experience/group/container to be replaced with a particular experience
+
+  if (experienceId && overrideIds[experienceId]) {
+    experienceId = overrideIds[experienceId];
+  } else if (groupId && overrideIds[groupId]) {
+    experienceId = overrideIds[groupId];
+  } else if (containerId && overrideIds[containerId]) {
+    experienceId = overrideIds[containerId];
+  }
+
+  var previewMode = window['ZMAGS_PREVIEW'] || ((_experienceId = experienceId) === null || _experienceId === void 0 ? void 0 : _experienceId.startsWith('PREVIEW_'));
+
+  if (!experienceId && contentSchedule) {
+    // If there's a contentSchedule (and no experienceId or groupId to override it), then filter for
+    //   active experiences with the detected (or default) language.
+    var _ref2 = contentSchedule || {},
+        _defaultLanguage = _ref2.defaultLanguage,
+        _ref2$scheduledExperi = _ref2.scheduledExperiences,
+        _scheduledExperiences = _ref2$scheduledExperi === void 0 ? [] : _ref2$scheduledExperi,
+        _defaultExperienceId = _ref2.defaultExperienceId,
+        _ref2$defaultBreakpoi = _ref2.defaultBreakpointGroup,
+        _defaultBreakpointGroup = _ref2$defaultBreakpoi === void 0 ? [] : _ref2$defaultBreakpoi;
+
+    _scheduledExperiences.forEach(function (_ref3) {
+      var language = _ref3.language;
+      // back-populate experience language codes into language mapping so that they're available in case they were missed
+      var languageKey = language.toLocaleLowerCase();
+
+      if (!languageMapping[languageKey]) {
+        languageMapping[languageKey] = [language];
+      } else if (!languageMapping[languageKey].find(function (l) {
+        return l === language;
+      })) {
+        languageMapping[languageKey].push(language);
+      }
+    });
+
+    var detectedLanguageEquivalents = detectLanguageFromAttribute() || detectLanguageFromUrl() || [_defaultLanguage];
+    if (previewMode && window.top.lang) detectedLanguageEquivalents = [window.top.lang];
+    var currentDateTime = new Date();
+    breakpointExperiences = [];
+    var liveCollectionWeights = {};
+    var liveExperiences = [];
+
+    _scheduledExperiences.forEach(function (experience) {
+      var startTime = experience.startTime,
+          endTime = experience.endTime,
+          _experience$collectio = experience.collectionId,
+          collectionId = _experience$collectio === void 0 ? "fallbackCollectionId" : _experience$collectio,
+          _experience$weight = experience.weight,
+          weight = _experience$weight === void 0 ? 100 : _experience$weight;
+      var hasStarted = !startTime || new Date(startTime) < currentDateTime;
+      var hasEnded = endTime && new Date(endTime) < currentDateTime;
+
+      if (hasStarted && !hasEnded) {
+        liveExperiences.push(experience);
+        liveCollectionWeights[collectionId] = weight;
+      }
+
+      var randomWeight = Math.random() * 100;
+      var cumulativeWeight = 0;
+      var liveCollectionIds = Object.keys(liveCollectionWeights);
+      var selectedCollectionId = liveCollectionIds.find(function (liveId) {
+        return (cumulativeWeight += liveCollectionWeights[liveId]) >= randomWeight;
+      }) || {};
+      liveExperiences.forEach(function (_ref4) {
+        var experienceId = _ref4.experienceId,
+            threshold = _ref4.threshold,
+            _ref4$collectionId = _ref4.collectionId,
+            collectionId = _ref4$collectionId === void 0 ? "fallbackCollectionId" : _ref4$collectionId,
+            language = _ref4.language;
+
+        if (collectionId === selectedCollectionId && detectedLanguageEquivalents.find(function (l) {
+          return l.toLocaleLowerCase() === language.toLocaleLowerCase();
+        })) {
+          var _breakpointExperience;
+
+          (_breakpointExperience = breakpointExperiences) === null || _breakpointExperience === void 0 ? void 0 : _breakpointExperience.push({
+            resourceId: experienceId,
+            threshold: threshold,
+            type: "Breakpoint"
+          });
+        }
+      });
+    });
+
+    if (breakpointExperiences.length === 0) {
+      experienceId = _defaultExperienceId;
+      breakpointExperiences = _defaultBreakpointGroup;
+    }
+  }
+
+  if (!experienceId && breakpointExperiences) {
+    var _selectableBreakpoint, _contentSchedule$sche;
+
+    var deviceWidth = Math.min(window.innerWidth, window.outerWidth) || window.innerWidth;
+    var sortedByBreakpoint = breakpointExperiences.sort(function (a, b) {
+      return b.threshold - a.threshold;
+    });
+    var filteredByDeviceSize = sortedByBreakpoint.filter(function (breakpoint) {
+      return breakpoint.threshold <= deviceWidth;
+    });
+    var selectableBreakpoints = filteredByDeviceSize.length > 0 ? filteredByDeviceSize : sortedByBreakpoint;
+    experienceId = (_selectableBreakpoint = selectableBreakpoints[0]) === null || _selectableBreakpoint === void 0 ? void 0 : _selectableBreakpoint.resourceId;
+    if (previewMode) window.top.lang = contentSchedule === null || contentSchedule === void 0 ? void 0 : (_contentSchedule$sche = contentSchedule.scheduledExperiences.find(function (x) {
+      return x.experienceId === experienceId;
+    })) === null || _contentSchedule$sche === void 0 ? void 0 : _contentSchedule$sche.language;
+  }
+
+  var formatAsset = function formatAsset(_ref5) {
+    var asset = _ref5.asset,
+        extension = _ref5.extension,
+        host = _ref5.host,
+        version = _ref5.version;
+    var assetLocation = "".concat(host).concat(asset);
+
+    if (version) {
+      assetLocation = "".concat(assetLocation, ".").concat(version);
+    }
+
+    return "".concat(assetLocation, ".").concat(extension);
+  };
+
+  function loadStyles() {
+    var styleAssets = ["styles"];
+    styleAssets.forEach(function (asset) {
+      var source = formatAsset({
+        asset: asset,
+        extension: "css",
+        host: host,
+        version: defaultVersionId
+      });
+      var linkTag = document.createElement("link");
+      linkTag.href = "".concat(source);
+      linkTag.rel = "stylesheet";
+      linkTag.type = "text/css";
+      document.head.appendChild(linkTag);
+    });
+  }
+
+  function spamMessagesFromRoot() {
+    var queue = [window.top];
+
+    while (queue.length !== 0) {
+      var queueLength = queue.length;
+
+      for (var i = 0; i < queueLength; i++) {
+        var current = queue.shift();
+        if (!current) return;
+
+        if (current === window) {
+          return;
+        }
+
+        for (var _i = 0; _i < current.frames.length; _i++) {
+          queue.push(current.frames[_i]);
+        }
+
+        current.postMessage("reportFFView", "*");
+      }
+    }
+  } // In a frame with N experiences, add listener once .
+
+
+  if (!window["zmags_listener"]) {
+    window.addEventListener('message', function (event) {
+      if (event.data === 'reportFFView') {
+        event.source.postMessage("ackFFView", "*");
+      } else if (event.data === 'ackFFView') {
+        window['zmags_pageHitSent'] = true;
+      }
+    });
+    window["zmags_listener"] = true;
+  }
+
+  function checkPageHit(retry, timeout) {
+    spamMessagesFromRoot();
+    setTimeout(function () {
+      if (!window['zmags_pageHitSent']) {
+        if (retry < 3) {
+          checkPageHit(retry + 1, timeout * 1.5);
+        } else {
+          var _window, _window$location;
+
+          var page = (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : _window$location.href;
+          var encoded = "";
+
+          if (page) {
+            encoded = encodeURIComponent(page);
+          }
+
+          fetch("".concat(casBaseURI, "/config/config.json?cb=").concat(Date.now(), "&cid=").concat(companyId, "&pg=").concat(encoded)).catch();
+          window['zmags_pageHitSent'] = true;
+          return;
+        }
+      }
+    }, timeout);
+  }
+
+  var ssrPath = undefined || "".concat(casBaseURI, "/").concat(companyId, "/ssr/experiences/").concat(experienceId);
+
+  if (experienceId) {
+    // Check page hit if we're uncertain if we've seen a page hit yet in this window
+    if (!window["zmags_pageHitSent"]) {
+      checkPageHit(0, 200);
+    }
+
+    var zmagsExecutionCountProperty = "ZMAGS_".concat(experienceId, "_EXECUTION_COUNT");
+
+    if (window[zmagsExecutionCountProperty] === undefined) {
+      window[zmagsExecutionCountProperty] = 0;
+    }
+
+    window[zmagsExecutionCountProperty] += 1;
+    connectVars.experienceIdWithExecutionCount = "".concat(experienceId, "_").concat(window[zmagsExecutionCountProperty]);
+    connectVars.viewerDivClassName = "".concat(defaultVersionId, "_").concat(connectVars.experienceIdWithExecutionCount);
+    connectVars.ssrBehaviorCacheProperty = "ssrBehaviorCache_".concat(connectVars.experienceIdWithExecutionCount);
+    connectVars.windowStateInitializedEvent = "WindowStateInitialized_".concat(connectVars.experienceIdWithExecutionCount);
+    connectVars.behaviorExecutedEvent = "BehaviorExecuted_".concat(connectVars.experienceIdWithExecutionCount);
+    connectVars.behaviorsDataProperty = "behaviors_data_".concat(experienceId);
+    connectVars.overrideBehaviorsDataProperty = "overrideBehaviorsData_".concat(experienceId);
+    connectVars.ssrTempClass = "zmags-ssr-".concat(connectVars.viewerDivClassName);
+    var viewerDiv = document.createElement("div");
+    var observer = new IntersectionObserver(function (entries, observer) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          var _window2, _window2$location;
+
+          var pg = (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : _window2$location.href;
+
+          if (pg) {
+            pg = encodeURIComponent(pg);
+          }
+
+          var expHitUri = "".concat(casBaseURI, "/expConfig/config.json?cb=").concat(Date.now(), "&cid=").concat(companyId, "&pg=").concat(pg, "&eid=").concat(experienceId);
+
+          if (containerId) {
+            expHitUri += "&c3id=".concat(containerId);
+          }
+
+          fetch(expHitUri).catch();
+          observer.disconnect();
+        }
+      });
+    }, {
+      threshold: 0.001
+    });
+    observer.observe(viewerDiv);
+    var ssrRequest = new XMLHttpRequest();
+    var ssrHtmlUrl = "".concat(ssrPath, "/").concat(experienceId, ".html");
+    if (previewMode) ssrHtmlUrl += "?cacheBuster=".concat(Date.now());
+    ssrRequest.open('GET', ssrHtmlUrl, false);
+    ssrRequest.send(null);
+
+    if (!window[windowInitVersion]) {
+      loadStyles();
+    }
+
+    if (ssrRequest.status === 200) {
+      var _document$currentScri3;
+
+      if (!document.head.querySelector('meta[name=viewport]')) {
+        var meta = document.createElement('meta');
+        meta.setAttribute('name', 'viewport');
+        meta.setAttribute('content', 'width=device-width, initial-scale=1.0');
+        document.head.appendChild(meta);
+      }
+
+      if (!document.head.querySelector("link[href=\"".concat(imageApiBaseURI, "/assets/images/\"]"))) {
+        var preconnect = document.createElement('link');
+        preconnect.setAttribute('rel', 'preconnect');
+        preconnect.setAttribute('href', "".concat(imageApiBaseURI, "/assets/images/"));
+        document.head.appendChild(preconnect);
+      }
+
+      var parser = new DOMParser();
+      var responseHTML = parser.parseFromString(ssrRequest.responseText, "text/html");
+      var scripts = responseHTML.getElementsByTagName("script");
+
+      for (var i = 0; i < scripts.length; i++) {
+        var scriptTag = document.createElement('script');
+        scriptTag.innerHTML = scripts[i].innerHTML;
+        document.head.appendChild(scriptTag);
+      }
+
+      var scrollTop = window.pageYOffset;
+
+      if (window["preload_data_".concat(experienceId)]) {
+        var _document$currentScri, _tempDiv$parentElemen;
+
+        var tempDiv = document.createElement('div');
+
+        if (window[connectVars.behaviorsDataProperty]) {
+          window.addEventListener(connectVars.windowStateInitializedEvent, capture);
+          window.addEventListener(connectVars.behaviorExecutedEvent, syncBehaviorExecutionWithState);
+          viewerDiv.className = connectVars.viewerDivClassName;
+          viewerDiv.style.opacity = "0";
+        }
+
+        tempDiv.style.width = "100%";
+        (_document$currentScri = document.currentScript) === null || _document$currentScri === void 0 ? void 0 : _document$currentScri.insertAdjacentElement("afterend", tempDiv);
+        var _window$ = window["preload_data_".concat(experienceId)],
+            _height = _window$.height,
+            _width = _window$.width,
+            _widgets = _window$.widgets;
+        var clientWidth = tempDiv.clientWidth || window.innerWidth;
+        var scaleFactor = clientWidth / _width;
+        var expScaleFactor = clientWidth / window.innerWidth;
+        var viewerTop = tempDiv.getBoundingClientRect().top || 0;
+        document.documentElement.style.setProperty("--".concat(experienceId, "-w"), "" + clientWidth);
+        (_tempDiv$parentElemen = tempDiv.parentElement) === null || _tempDiv$parentElemen === void 0 ? void 0 : _tempDiv$parentElemen.removeChild(tempDiv);
+        var dpr = window.devicePixelRatio || 1;
+        Array.from(responseHTML.getElementsByTagName('img')).forEach(function (image) {
+          image.sizes = "".concat(Number(image.sizes.split('vw')[0]) / dpr * expScaleFactor, "vw");
+        });
+        var heightFactor = scaleFactor * _height / 100;
+        var fontStyles = '';
+
+        for (var _i2 = 0; _i2 < _widgets.length; _i2++) {
+          var preloadElement = _widgets[_i2];
+
+          var _top = viewerTop + preloadElement.top * heightFactor;
+
+          if (_top <= window.innerHeight && preloadElement.type !== "customFont" && preloadElement.type !== "typekit") {
+            htmlPreloadElement(preloadElement, responseHTML);
+            var _fontDetails = preloadElement.fontDetails;
+
+            if (_fontDetails === null || _fontDetails === void 0 ? void 0 : _fontDetails.fontFamily) {
+              fontStyles += "\n                        @font-face {\n                            font-family: \"".concat(_fontDetails.fontFamily, "\";\n                            font-style: ").concat(_fontDetails.fontStyle, ";\n                            font-weight: ").concat(_fontDetails.fontWeight, ";\n                            font-display: fallback;\n                            src: url(\"").concat(preloadElement.path, "\") format(\"").concat(preloadElement.format, "\"); \n                          }\n                          ");
+            }
+          } else if (preloadElement.type === "customFont" || preloadElement.type === "typekit") {
+            htmlPreloadElement(preloadElement, responseHTML);
+            var _fontDetails2 = preloadElement.fontDetails;
+
+            if (_fontDetails2 === null || _fontDetails2 === void 0 ? void 0 : _fontDetails2.fontFamily) {
+              fontStyles += "\n                        @font-face {\n                            font-family: \"".concat(_fontDetails2.fontFamily, "\";\n                            src: url(\"").concat(preloadElement.path, "\") format(\"").concat(_fontDetails2.fontFormat, "\");\n                            font-weight: ").concat(_fontDetails2.fontWeight, ";\n                            font-style: ").concat(_fontDetails2.fontStyle, ";\n                            font-display: fallback;\n                          }\n                          ");
+
+              if (preloadElement.type === "typekit") {
+                if (!window.zmagsLoadedFonts) window.zmagsLoadedFonts = {};
+                window.zmagsLoadedFonts[preloadElement.id] = true;
+              }
+            }
+          }
+        }
+
+        if (fontStyles) {
+          var css = document.createElement('style');
+          css.appendChild(document.createTextNode(fontStyles));
+          document.getElementsByTagName("head")[0].appendChild(css);
+        }
+      } else {
+        preloadImages(responseHTML);
+      }
+
+      var containerElement = responseHTML.querySelector("[class^=\"zmags-viewer-container\"");
+
+      if (!containerElement) {
+        var _document$currentScri2;
+
+        // failed to load valid SSR HTML so fallback to loading the experience without SSR
+        viewerDiv.setAttribute("class", "zmags-viewer-container-".concat(defaultVersionId));
+        viewerDiv.setAttribute("data-experience", experienceId);
+        (_document$currentScri2 = document.currentScript) === null || _document$currentScri2 === void 0 ? void 0 : _document$currentScri2.insertAdjacentElement("afterend", viewerDiv);
+        loadAssets();
+        return;
+      }
+
+      containerElement.className = connectVars.ssrTempClass;
+      containerElement.setAttribute("data-ordinal", window[zmagsExecutionCountProperty]);
+      viewerDiv.innerHTML = containerElement.outerHTML;
+      (_document$currentScri3 = document.currentScript) === null || _document$currentScri3 === void 0 ? void 0 : _document$currentScri3.insertAdjacentElement("afterend", viewerDiv);
+
+      if (!window["preload_data_".concat(experienceId)]) {
+        var docImages = viewerDiv.getElementsByClassName('widget-component image-widget');
+
+        for (var _i3 = 0; _i3 < docImages.length; _i3++) {
+          var imgDiv = docImages[_i3];
+          var img = imgDiv.getElementsByTagName('img')[0];
+          var isInViewPort = imgDiv.offsetTop < window.innerHeight + scrollTop;
+          img.setAttribute('loading', isInViewPort ? 'eager' : 'lazy');
+          img.setAttribute('decoding', 'sync');
+        }
+      }
+
+      if (window[connectVars.behaviorsDataProperty]) {
+        var behaviorsToExecute = window['ZMAGS_PREVIEW'] && window[connectVars.overrideBehaviorsDataProperty] ? window[connectVars.overrideBehaviorsDataProperty] : window[connectVars.behaviorsDataProperty];
+        executeBehavior(behaviorsToExecute[0], viewerDiv);
+      }
+
+      loadAssetsWithHydrate();
+    } else {
+      var _document$currentScri4;
+
+      viewerDiv.setAttribute("class", "zmags-viewer-container-".concat(defaultVersionId));
+      viewerDiv.setAttribute("data-experience", experienceId);
+      (_document$currentScri4 = document.currentScript) === null || _document$currentScri4 === void 0 ? void 0 : _document$currentScri4.insertAdjacentElement("afterend", viewerDiv);
+      loadAssets();
+    }
+  } else {
+    loadStyles();
+    loadAssets();
+  }
+
+  function getHashParamMap() {
+    var _window$location$hash;
+
+    var hashParamMap = {};
+    (_window$location$hash = window.location.hash) === null || _window$location$hash === void 0 ? void 0 : _window$location$hash.slice(1).split('&').forEach(function (item) {
+      var _item$split = item.split('='),
+          _item$split2 = _toArray(_item$split),
+          key = _item$split2[0],
+          value = _item$split2.slice(1);
+
+      var valueStr = value.join('=');
+
+      if (key === overrideIdPrefix) {
+        hashParamMap[key] = {};
+        valueStr.split(',').forEach(function (overrideStr) {
+          var _overrideStr$split = overrideStr.split('-'),
+              _overrideStr$split2 = _toArray(_overrideStr$split),
+              fromId = _overrideStr$split2[0],
+              toId = _overrideStr$split2.slice(1);
+
+          hashParamMap[key][fromId] = toId.join('-');
+        });
+      } else {
+        hashParamMap[key] = valueStr;
+      }
+    });
+    return hashParamMap;
+  }
+
+  function defaultLanguageMapping() {
+    var equivalentLanguages = [["en", "en-us", "english"], ["fr", "fr-fr", "french"], ["da", "danish"], ["es", "spanish"]];
+    var languageMapping = {};
+    equivalentLanguages.forEach(function (langArr) {
+      return langArr.forEach(function (lang) {
+        return languageMapping[lang] = langArr;
+      });
+    });
+    return languageMapping;
+  }
+
+  function detectLanguageFromAttribute() {
+    var _document$currentScri5;
+
+    var attributeLanguage = ((_document$currentScri5 = document.currentScript) === null || _document$currentScri5 === void 0 ? void 0 : _document$currentScri5.getAttribute("data-language")) || document.documentElement.lang;
+    return attributeLanguage ? languageMapping[attributeLanguage] : undefined;
+  }
+
+  function detectLanguageFromUrl() {
+    var matchedLanguage = window.location.href.split(/[:\/.?#&,=]/) // split the url by special chars except dashes for language lookup (eg. en-US)
+    .map(function (urlPart) {
+      return urlPart.toLocaleLowerCase();
+    }).find(function (part) {
+      return languageMapping[part] || languageMapping[part.split("-")[0]];
+    });
+    return matchedLanguage ? languageMapping[matchedLanguage] : undefined;
+  }
+
+  function htmlPreloadElement(element, responseHTML) {
+    var id = element.id,
+        type = element.type,
+        format = element.format,
+        path = element.path;
+
+    if (type === "image" && responseHTML.getElementById("image-id-".concat(id))) {
+      var imageElement = responseHTML.getElementById("image-id-".concat(id));
+      var src = imageElement.src,
+          srcset = imageElement.srcset,
+          sizes = imageElement.sizes;
+
+      if (!document.head.querySelector("link[href=\"".concat(src, "\"]")) && src) {
+        imageElement.setAttribute('loading', 'eager');
+        imageElement.setAttribute('decoding', 'sync');
+        var link = document.createElement('link');
+        link.setAttribute('rel', 'preload');
+        link.setAttribute('as', 'image');
+        link.setAttribute('href', src);
+        link.setAttribute('imagesrcset', srcset);
+        link.setAttribute('imagesizes', sizes);
+        link.setAttribute('decoding', 'sync');
+        document.head.appendChild(link);
+      }
+    } else if (type === "buttonSvg") {
+      if (!document.head.querySelector("link[href=\"".concat(path, "\"]")) && path) {
+        var _link = document.createElement('link');
+
+        _link.setAttribute('rel', 'preload');
+
+        _link.setAttribute('as', 'image');
+
+        _link.setAttribute('href', path);
+
+        _link.setAttribute('decoding', 'sync');
+
+        document.head.appendChild(_link);
+      }
+    } else if (type === "customFont" || type === "typekit") {
+      if (!document.head.querySelector("link[href=\"".concat(path, "\"]"))) {
+        var _link2 = document.createElement('link');
+
+        _link2.setAttribute('rel', 'preload');
+
+        _link2.setAttribute('as', 'font');
+
+        _link2.setAttribute('href', path);
+
+        _link2.setAttribute('type', format);
+
+        _link2.setAttribute('crossorigin', 'true');
+
+        document.head.appendChild(_link2);
+      }
+    } else if (type === "google") {
+      if (!document.head.querySelector("link[href=\"https://fonts.gstatic.com\"]") && type === "google") {
+        var _link3 = document.createElement('link');
+
+        _link3.setAttribute('rel', 'preconnect');
+
+        _link3.setAttribute('href', 'https://fonts.gstatic.com');
+
+        _link3.setAttribute('crossorigin', 'true');
+
+        document.head.appendChild(_link3);
+      }
+
+      var link1 = document.createElement('link');
+      link1.setAttribute('rel', 'preload');
+      link1.setAttribute('href', path);
+      link1.setAttribute('as', 'font');
+      link1.setAttribute('type', format);
+      document.head.appendChild(link1);
+    } else if (type === "html") {
+      var iframe = responseHTML.getElementById("iframe-id-".concat(id));
+
+      if (iframe) {
+        iframe.setAttribute('loading', 'eager');
+      }
+    }
+  }
+
+  function preloadImages(ssrDOM) {
+    var images = ssrDOM.getElementsByTagName('img');
+
+    for (var _i4 = 0; _i4 < images.length; _i4++) {
+      var _images$_i = images[_i4],
+          src = _images$_i.src,
+          srcset = _images$_i.srcset,
+          sizes = _images$_i.sizes;
+
+      if (!document.head.querySelector("link[href=\"".concat(src, "\"]"))) {
+        var link = document.createElement('link');
+        link.setAttribute('rel', 'preload');
+        link.setAttribute('as', 'image');
+        link.setAttribute('href', src);
+        link.setAttribute('imagesrcset', srcset);
+        link.setAttribute('imagesizes', sizes);
+        link.setAttribute('decoding', 'async');
+        document.head.appendChild(link);
+      }
+    }
+  }
+
+  function getCompanySettings() {
+    if (window["".concat(companyId, "_SETTINGS")]) {
+      return Promise.resolve(window["".concat(companyId, "_SETTINGS")]);
+    }
+
+    return fetch("".concat(creatorBaseURI, "/api/companies/").concat(companyId, "/settings")).then(function (res) {
+      return res.json();
+    }).then(function (companySettings) {
+      window["".concat(companyId, "_SETTINGS")] = companySettings;
+      return companySettings;
+    });
+  }
+
+  async function loadAssetsWithHydrate() {
+    if (window["".concat(connectVars.experienceIdWithExecutionCount, "_STATE")]) {
+      loadAssets();
+      return;
+    }
+
+    var containerElement = document.getElementsByClassName(connectVars.ssrTempClass)[0];
+    var clientHeight = containerElement.clientHeight,
+        clientWidth = containerElement.clientWidth;
+
+    function resizeExperience() {
+      if (containerElement.clientWidth > 0) {
+        document.documentElement.style.setProperty("--".concat(experienceId, "-w"), "" + containerElement.clientWidth);
+
+        if (clientHeight) {
+          clientHeight = containerElement.clientHeight;
+          clientWidth = containerElement.clientWidth;
+        }
+      }
+    }
+
+    var resizeObserver = new ResizeObserver(resizeExperience);
+    resizeObserver.observe(containerElement);
+    var ssrStateUrl = "".concat(ssrPath, "/").concat(experienceId, "_state.json");
+    if (previewMode) ssrStateUrl += "?cacheBuster=".concat(Date.now());
+
+    try {
+      var _window$ZMAGS_API, _window$ZMAGS_API$exp, _window$ZMAGS_API$exp2;
+
+      var res = await fetch(ssrStateUrl);
+      var experienceState = await res.json();
+      experienceState.page = {
+        "viewportHeight": window.innerHeight,
+        "viewportWidth": window.innerWidth,
+        "containerHeight": clientHeight,
+        "containerWidth": clientWidth
+      };
+      if (contentSchedule) experienceState.viewer.breakpointGroups = breakpointExperiences;
+      var modelCallbacks = ((_window$ZMAGS_API = window.ZMAGS_API) === null || _window$ZMAGS_API === void 0 ? void 0 : (_window$ZMAGS_API$exp = _window$ZMAGS_API.experiences) === null || _window$ZMAGS_API$exp === void 0 ? void 0 : (_window$ZMAGS_API$exp2 = _window$ZMAGS_API$exp["".concat(connectVars.experienceIdWithExecutionCount)]) === null || _window$ZMAGS_API$exp2 === void 0 ? void 0 : _window$ZMAGS_API$exp2.modelCallbacks) || [];
+
+      if (modelCallbacks.length) {
+        await Promise.all(modelCallbacks.map(async function (modelCallback) {
+          experienceState.viewer.experiences["".concat(experienceId)].model = await modelCallback(experienceState.viewer.experiences["".concat(experienceId)].model);
+        }));
+      }
+
+      window["".concat(connectVars.experienceIdWithExecutionCount, "_STATE")] = experienceState;
+      containerElement.className = containerElement.className.replace(connectVars.ssrTempClass, "zmags-viewer-container-".concat(defaultVersionId));
+
+      if (window[connectVars.behaviorsDataProperty]) {
+        window.dispatchEvent(new Event(connectVars.windowStateInitializedEvent));
+      } else {
+        loadAssets();
+      }
+    } catch (err) {
+      console.error("Failed to fetch SSR state for experience: ".concat(experienceId), err);
+
+      try {
+        var _ref6 = await Promise.all([getCompanySettings(), fetch("".concat(creatorBaseURI, "/api/experiences/").concat(experienceId))]),
+            _ref7 = _slicedToArray(_ref6, 2),
+            companySettings = _ref7[0],
+            experienceRes = _ref7[1];
+
+        var experienceJson = await experienceRes.json();
+        window["".concat(connectVars.experienceIdWithExecutionCount, "_STATE")] = {
+          company: {
+            model: companySettings
+          },
+          page: {
+            "viewportHeight": window.innerHeight,
+            "viewportWidth": window.innerWidth,
+            "containerHeight": clientHeight,
+            "containerWidth": clientWidth
+          },
+          viewer: {
+            activeExperienceId: experienceId,
+            breakpointGroups: breakpointExperiences,
+            experiences: _defineProperty({}, experienceJson.id, {
+              currentSceneNumber: 1,
+              transitionDirection: 0,
+              model: experienceJson
+            }),
+            queuedAnalyticsEvents: [],
+            queuedGroupEvents: [],
+            initialLoad: false,
+            experienceFit: "width"
+          }
+        };
+      } catch (err) {
+        console.error("Failed to rebuild init state for experience: ".concat(experienceId), err);
+      } finally {
+        containerElement.className = containerElement.className.replace(connectVars.ssrTempClass, "zmags-viewer-container-".concat(defaultVersionId));
+        loadAssets();
+      }
+    }
+  }
+
+  function loadAssets() {
+    if (!window[windowInitVersion]) {
+      // eslint-disable-next-line camelcase
+      window[windowInitVersion] = {
+        version: defaultVersionId
+      };
+      var scriptAssets = new Map([["commons", "async"], ["driver", "async"], ["vendor", "async"], ["gsap", "async"], ["reactPlayer", "async"], ["manifest", "defer"], ["client", "defer"]]);
+      scriptAssets.forEach(function (loadType, asset) {
+        var source = formatAsset({
+          asset: asset,
+          extension: "js",
+          host: host,
+          version: defaultVersionId
+        });
+        var scriptTag = document.createElement("script");
+        scriptTag.src = source;
+        scriptTag.setAttribute(loadType, loadType);
+        document.body.appendChild(scriptTag);
+      });
+    }
+  }
+
+  function capture() {
+    stateJsonFetched = true;
+    syncBehaviorExecutionWithState();
+  }
+
+  function get(obj, path, def) {
+    var fullPath = path.replace(/\[/g, '.').replace(/]/g, '').split('.').filter(Boolean);
+    return fullPath.every(everyFunc) ? obj : def;
+
+    function everyFunc(step) {
+      return !(step && (obj = obj[step]) === undefined);
+    }
+  }
+
+  function isEmpty(value) {
+    return value === undefined || value === null || _typeof(value) === "object" && Object.keys(value).length === 0 || typeof value === "string" && value.trim().length === 0 || Array.isArray(value) && value.length === 0;
+  }
+
+  function getWidgetParentDiv(widgetId) {
+    return document.querySelector("[class=\"".concat(connectVars.viewerDivClassName, "\"] [id=\"").concat(experienceId, "_").concat(widgetId, "\"]"));
+  }
+
+  function isValidURL(string) {
+    var res = string.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+    return res !== null;
+  }
+
+  ;
+
+  function asyncEval(jsSnippet) {
+    return new Promise(function (resolve) {
+      var result = eval("(async () => { ".concat(jsSnippet, " })();"));
+      resolve(result);
+    });
+  }
+
+  ;
+
+  function executePageJS(jsSnipppet, onSuccess) {
+    var extractFromPageMode = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+    if (jsSnipppet) {
+      try {
+        if (extractFromPageMode) {
+          var result = eval("(function(){ ".concat(jsSnipppet, " })();"));
+          return result;
+        } else {
+          Promise.all([asyncEval(jsSnipppet).then(function (res) {
+            if (extractFromPageMode) {
+              return res;
+            }
+
+            onSuccess({
+              data: res
+            });
+          })]).catch(function (err) {
+            console.log(err);
+          });
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    ;
+    return;
+  }
+
+  function setCache(stepId, state, response) {
+    window[connectVars.ssrBehaviorCacheProperty][stepId] = {
+      result: response,
+      state: state
+    };
+  }
+
+  function getResultFromCache(stepId) {
+    return window[connectVars.ssrBehaviorCacheProperty][stepId].result;
+  } // Walk the behavior ast, counting the number of branches.
+
+
+  function countBlockingCalls(node, shouldUpdateBehavior) {
+    if (shouldUpdateBehavior) updateBehavior(node, connectVars.experienceIdWithExecutionCount, {});
+    var subtreeDepth = node.stateKey === 'newTrigger' ? 1 : 0;
+
+    for (var _i5 = 0; node.steps && _i5 < node.steps.length; ++_i5) {
+      subtreeDepth += countBlockingCalls(node.steps[_i5], shouldUpdateBehavior);
+    }
+
+    return subtreeDepth;
+  } // Validate whether any elements of the behavior are still pending, fire completion if not.
+
+
+  function decrementComplete(numCompleted) {
+    pendingBranches -= numCompleted;
+
+    if (pendingBranches === 0) {
+      window.dispatchEvent(new Event(connectVars.behaviorExecutedEvent));
+    }
+  }
+
+  function replaceChar(origString, replaceChar, index) {
+    var firstPart = origString.substr(0, index);
+    var lastPart = origString.substr(index + 1);
+    var newString = firstPart + replaceChar + lastPart;
+    return newString;
+  }
+
+  function replaceAll(string, search, replace) {
+    return string.split(search).join(replace);
+  }
+
+  function updateWidget(updatedWidgetChanges, widget) {
+    updatedWidgetChanges === null || updatedWidgetChanges === void 0 ? void 0 : updatedWidgetChanges.forEach(function (updatedWidget) {
+      if (updatedWidget && Object.keys(updatedWidget) && Object.keys(updatedWidget).length) {
+        switch (updatedWidget.type) {
+          case 'showHide':
+            var isHidden = updatedWidget.isHidden;
+            if (isHidden) widget.isHidden = isHidden;
+            break;
+
+          case "replaceImage":
+            var src = updatedWidget.src,
+                changeSource = updatedWidget.changeSource;
+            if (src) widget.src = src;
+            if (changeSource) widget.changeSource = changeSource;
+            break;
+
+          case "updateTextButton":
+            var placeholder = updatedWidget.placeholder,
+                text = updatedWidget.text;
+
+            if (widget.type === 'button') {
+              widget.label = replaceAll(widget.label, placeholder, text);
+            } else {
+              widget.text = replaceAll(widget.text, placeholder, text);
+            }
+
+            break;
+
+          case "addAltText":
+            var altText = updatedWidget.altText;
+            if (altText) widget.altText = altText;
+            break;
+
+          case "updateOnClick":
+            if (updatedWidget.placeholder && updatedWidget.text) {
+              widget.action.url = replaceAll(widget.action.url, updatedWidget.placeholder, updatedWidget.text);
+            } else {
+              widget.action.target = "top";
+              widget.action.url = "";
+            }
+
+            break;
+
+          case "mouseoverImageSwap":
+            var effects = updatedWidget.effects;
+            if (effects) widget.effects = effects;
+            break;
+        }
+      }
+    });
+  }
+
+  function updateWidgetWithState(widget) {
+    var updatedWidgetChanges = connectVars.updatedWidgets[widget.uuid];
+
+    if (widget.group) {
+      for (var _i6 = 0; _i6 < widget.group.length; _i6++) {
+        var updatedWidget = connectVars.updatedWidgets[widget.group[_i6].uuid];
+        updateWidget(updatedWidget, widget.group[_i6]);
+      }
+    } else {
+      updateWidget(updatedWidgetChanges, widget);
+    }
+  }
+
+  function executePendingActions(experienceJson) {
+    var _experienceJson$overl, _experienceJson$backg;
+
+    var combinedWidgets = [];
+    experienceJson.scenes.every(function (scene) {
+      return combinedWidgets = combinedWidgets.concat(scene.widgets);
+    });
+    combinedWidgets = combinedWidgets.concat((_experienceJson$overl = experienceJson.overlayScene) === null || _experienceJson$overl === void 0 ? void 0 : _experienceJson$overl.widgets);
+    combinedWidgets = combinedWidgets.concat((_experienceJson$backg = experienceJson.backgroundScene) === null || _experienceJson$backg === void 0 ? void 0 : _experienceJson$backg.widgets);
+    pendingActions.forEach(function (_ref8) {
+      var step = _ref8.step,
+          parentData = _ref8.parentData;
+      var response = window[connectVars.ssrBehaviorCacheProperty][step.data.triggerId].result;
+      var wIndex = combinedWidgets.findIndex(function (w) {
+        return w.uuid === step.data.widgetId;
+      });
+      var type = step.data.type;
+
+      if (wIndex > -1) {
+        switch (type) {
+          case 'mouseoverImageSwap':
+            {
+              var _combinedWidgets$wInd = combinedWidgets[wIndex],
+                  effects = _combinedWidgets$wInd.effects,
+                  src = _combinedWidgets$wInd.src;
+              var updatedWidget = executeMouseoverImageSwapAction(effects, src, step.data, response, parentData);
+
+              if (updatedWidget) {
+                var widgetId = combinedWidgets[wIndex].uuid;
+                if (!connectVars.updatedWidgets[widgetId]) connectVars.updatedWidgets[widgetId] = [];
+                connectVars.updatedWidgets[widgetId].push(_objectSpread({}, updatedWidget, {
+                  type: type
+                }));
+              }
+
+              break;
+            }
+        }
+      }
+    });
+  }
+
+  function syncBehaviorExecutionWithState() {
+    if (!(pendingBranches === 0 && stateJsonFetched)) return;
+    var experienceJson = window["".concat(connectVars.experienceIdWithExecutionCount, "_STATE")].viewer.experiences[experienceId].model;
+    executePendingActions(experienceJson);
+    experienceJson.scenes.forEach(function (scene) {
+      scene.widgets.forEach(function (widget) {
+        return updateWidgetWithState(widget);
+      });
+    });
+
+    if (experienceJson.backgroundScene && experienceJson.backgroundScene.widgets && experienceJson.backgroundScene.widgets.length) {
+      experienceJson.backgroundScene.widgets.forEach(function (widget) {
+        return updateWidgetWithState(widget);
+      });
+    }
+
+    if (experienceJson.overlayScene && experienceJson.overlayScene.widgets && experienceJson.overlayScene.widgets.length) {
+      experienceJson.overlayScene.widgets.forEach(function (widget) {
+        return updateWidgetWithState(widget);
+      });
+    }
+
+    window["".concat(connectVars.experienceIdWithExecutionCount, "_STATE")].viewer.experiences[experienceId].model = experienceJson;
+    document.getElementsByClassName(connectVars.viewerDivClassName)[0].style.opacity = "1";
+    loadAssets();
+  }
+
+  function cloneSteps(steps) {
+    for (var _i7 = 0; _i7 < steps.length; _i7++) {
+      steps[_i7] = {
+        id: steps[_i7].id,
+        parentId: steps[_i7].parentId,
+        steps: steps[_i7].steps
+      };
+      if (steps[_i7].steps.length > 0) cloneSteps(steps[_i7].steps);
+    }
+  }
+
+  function updateSpecificStep(steps, stepId, responseData, type, src) {
+    if (!steps.length) {
+      return;
+    }
+
+    for (var _i8 = 0; _i8 < steps.length; _i8++) {
+      if (steps[_i8].id === stepId) {
+        steps[_i8] = _objectSpread({}, steps[_i8], {
+          src: src,
+          type: type,
+          data: responseData.data ? responseData.data : {}
+        });
+      } else {
+        updateSpecificStep(steps[_i8].steps, stepId, responseData, type, src);
+      }
+    }
+  }
+
+  ;
+
+  function updateBehavior(newStep, experienceId, responseData) {
+    var steps = window.ZMAGS_API.experiences[experienceId].model.behavior[0].steps;
+    var type = "";
+    var src = "";
+
+    if (newStep.stateKey === "newTrigger") {
+      type = "loadData";
+
+      if (newStep.data.formText === "Get Data From API") {
+        src = "api";
+      } else {
+        src = "executeJS";
+      }
+    } else if (newStep.stateKey === "newCondition") {
+      type = "condition";
+    } else if (newStep.stateKey === "newAction") {
+      type = "action";
+    }
+
+    updateSpecificStep(steps, newStep.id, responseData, type, src);
+  }
+
+  ;
+
+  function callAdapter(step, parameters, onSuccess, onError) {
+    var url = "".concat(step.adapterUrl || connectAdapterBaseURI, "/v2/companies/").concat(companyId, "/connections/").concat(step.connectionId, "/routes/").concat(step.routeId);
+    Object.keys(parameters).forEach(function (param) {
+      if (url.includes("?")) url += "&".concat(step.parameterPositions[param], "=").concat(encodeURI(parameters[param]));else url += "?".concat(step.parameterPositions[param], "=").concat(encodeURI(parameters[param]));
+    }); // PE-1539: Send cache bust parameter to adapter call in preview context
+
+    if (previewMode) url += url.includes("?") ? "&cacheBuster=".concat(Date.now()) : "cacheBuster=".concat(Date.now());
+
+    try {
+      Promise.all([fetch(url).then(function (res) {
+        return res.json();
+      })]).then(function (_ref9) {
+        var _ref10 = _slicedToArray(_ref9, 1),
+            data = _ref10[0];
+
+        return onSuccess(data);
+      }).catch(function (err) {
+        return onError(err);
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  function visit(step, response) {
+    if (step.stateKey === "newTrigger") {
+      executeTrigger(step, response);
+    } else if (step.stateKey === "newCondition") {
+      executeCondition(step);
+    } else if (step.stateKey === "newAction") {
+      try {
+        executeAction(step, response);
+      } catch (err) {}
+
+      ;
+    }
+  }
+
+  function visitChildrenOfTrigger(ast, triggerData) {
+    for (var _i9 = 0; _i9 < ast.steps.length; _i9++) {
+      var _step$data$details;
+
+      var step = ast.steps[_i9]; //If previouslyLoaded data isn't the immediate parent of this step.
+
+      if (((_step$data$details = step.data.details) === null || _step$data$details === void 0 ? void 0 : _step$data$details.triggerId) && step.data.loadType === "fromPreviouslyLoadedData") {
+        var prevTriggerData = getResultFromCache(step.data.details.triggerId);
+
+        if (prevTriggerData) {
+          triggerData = prevTriggerData;
+        }
+      }
+
+      visit(ast.steps[_i9], triggerData);
+    }
+  }
+
+  function getTriggerData(step, response, onSuccess, onError) {
+    var parameters;
+    var loadType = step.loadType;
+
+    try {
+      switch (loadType) {
+        case 'extractFromPage':
+          {
+            var previewInputs = step.previewInputs,
+                jsSnippet = step.details.jsSnippet;
+
+            if (window["ZMAGS_PREVIEW"]) {
+              parameters = previewInputs;
+            } else {
+              parameters = executePageJS(jsSnippet, onSuccess, true);
+            }
+
+            break;
+          }
+
+        case 'executeJs':
+          {
+            var _step$details = step.details,
+                metaData = _step$details.jsSnippetMetaData,
+                _jsSnippet = _step$details.jsSnippet;
+            var jsSnippetWithMetadata = metaData ? "".concat(metaData.replace('BEHAVIOR_EXPERIENCEID_PLACEHOLDER', connectVars.experienceIdWithExecutionCount)).concat(_jsSnippet) : _jsSnippet;
+            executePageJS(jsSnippetWithMetadata, onSuccess, false);
+            return;
+          }
+
+        case "textValue":
+          {
+            parameters = step.details.parameters;
+            break;
+          }
+
+        case "fromPreviouslyLoadedData":
+          {
+            var _step$details$paramet = step.details.parameters,
+                attribute = _step$details$paramet.attribute,
+                attributeValue = _step$details$paramet.attributeValue;
+
+            if (attribute && attributeValue) {
+              var value = get(response.data, attributeValue, "");
+              parameters = _defineProperty({}, attribute, value);
+            } else {
+              parameters = _defineProperty({}, step.details.field, response.data[step.details.field]);
+            }
+          }
+      }
+    } catch (e) {
+      // Anything can happen in executeJS, and if something bad happens we need to call onError
+      return onError(e);
+    } // Before calling the adapter, validate that all required parameters were provided.
+
+
+    for (var paramName in step.parameterPositions) {
+      if (!parameters[paramName]) {
+        return onError("Required parameter ".concat(paramName, " not provided."));
+      }
+    }
+
+    callAdapter(step, parameters, onSuccess, onError);
+  }
+
+  function executeTrigger(step, parentData) {
+    var cachedResponse = window[connectVars.ssrBehaviorCacheProperty][step.id]; // If an Adaptor call completes successfully or we have the data cached for a previous adaptor
+    // call, we will run the same success handler.
+
+    var onSuccess = function onSuccess(responseData) {
+      updateBehavior(step, connectVars.experienceIdWithExecutionCount, responseData);
+      visitChildrenOfTrigger(step, responseData);
+      decrementComplete(1);
+    };
+
+    if (cachedResponse) {
+      onSuccess(cachedResponse);
+    } else {
+      getTriggerData(step.data, parentData, function (responseData) {
+        setCache(step.id, "success", responseData);
+        onSuccess(responseData);
+      }, function (error) {
+        // If the trigger failed, don't wait for anything under this branch.
+        console.log(error);
+        var subtreeDepth = countBlockingCalls(step, true);
+        console.log("Depth below failing call is ".concat(subtreeDepth));
+        setCache(step.id, "error", error);
+        decrementComplete(subtreeDepth);
+      });
+    }
+  }
+
+  function isConditionSatisfied(ast, response) {
+    var value;
+    var _ast$data = ast.data,
+        conditionType = _ast$data.type,
+        index = _ast$data.index,
+        variable = _ast$data.variable,
+        customValue = _ast$data.value,
+        compareWithFieldName = _ast$data.compareWithFieldName,
+        fieldName = _ast$data.fieldName,
+        condition = _ast$data.condition;
+    var resType = response.type,
+        resData = response.data;
+    var i = index - 1;
+    var isArray = resType === "array" && index > -1;
+
+    if (conditionType === "customCondition") {
+      return resData[variable];
+    } else if (conditionType === 'price') {
+      if (isArray) value = resData[i][compareWithFieldName];else value = compareWithFieldName === 'custom' ? customValue : resData[compareWithFieldName];
+    } else if (conditionType === 'inventory') {
+      value = customValue;
+    }
+
+    var conditionExpression = isArray ? resData[i][fieldName] + " " + condition + " " + value : resData[fieldName] + " " + condition + " " + value;
+    return eval(conditionExpression);
+  }
+
+  function executeCondition(step) {
+    var response = getResultFromCache(step.data.triggerId);
+
+    for (var _i10 = 0; _i10 < step.steps.length; _i10++) {
+      var conditionSatisfied = void 0;
+
+      try {
+        conditionSatisfied = isConditionSatisfied(step, response);
+      } catch (err) {
+        conditionSatisfied = false;
+      }
+
+      setCache(step.id, "success", conditionSatisfied);
+      if (conditionSatisfied) visit(step.steps[_i10], response);else visit(step.steps[_i10], false);
+      updateBehavior(step, connectVars.experienceIdWithExecutionCount, {});
+    }
+  }
+
+  function executeShowHideAction(stepData, isConditionSatisfied) {
+    try {
+      var visibility = stepData.show;
+
+      if (isConditionSatisfied) {
+        return {
+          isHidden: !visibility
+        };
+      }
+
+      return {};
+    } catch (e) {
+      console.log('Error: executeShowHide action failed ', e);
+      return {};
+    }
+  }
+
+  function executeReplaceImageAction(stepData, response, isConditionSatisfied) {
+    try {
+      var resType = response.type,
+          resData = response.data;
+      var index = stepData.index,
+          src = stepData.src,
+          replaceImgField = stepData.replaceImageWith;
+      var changeSource;
+      var replaceImgFieldValue;
+
+      if (isConditionSatisfied) {
+        var fieldValue = getValueFromResponse(replaceImgField, src, index, resType, resData);
+
+        if (!isEmpty(resData)) {
+          changeSource = "behavior";
+        }
+
+        if (isValidURL(fieldValue)) {
+          replaceImgFieldValue = fieldValue;
+        }
+      }
+
+      return {
+        changeSource: changeSource,
+        src: replaceImgFieldValue
+      };
+    } catch (e) {
+      console.log('Error: replaceImage action failed', e);
+      return {};
+    }
+  }
+
+  function getValueFromResponse(replaceWithField, value, index, resType, resData) {
+    if (replaceWithField === "custom") {
+      return value;
+    }
+
+    var idxPointer = index - 1;
+
+    if (resType === "array" && index > -1 && resData[idxPointer]) {
+      return resData[idxPointer][replaceWithField];
+    }
+
+    return resData[replaceWithField];
+  }
+
+  function executeUpdateTextButtonAction(stepData, response, isConditionSatisfied) {
+    try {
+      var resType = response.type,
+          resData = response.data;
+      var placeholder = stepData.placeholder,
+          value = stepData.value,
+          replaceWithField = stepData.replaceWith,
+          index = stepData.index;
+      var fieldValue = getValueFromResponse(replaceWithField, value, index, resType, resData);
+
+      if (!isConditionSatisfied) {
+        var placeholderTxt = placeholder.slice(1, placeholder.length - 1);
+        return {
+          text: placeholderTxt,
+          placeholder: placeholder
+        };
+      }
+
+      return {
+        text: fieldValue,
+        placeholder: placeholder
+      };
+    } catch (e) {
+      console.log('Error: updateText action failed', e);
+      return {};
+    }
+  }
+
+  function executeAddAltTextAction(stepData, response, isConditionSatisfied) {
+    try {
+      var resType = response.type,
+          resData = response.data;
+      var replaceImageAltTextWith = stepData.replaceImageAltTextWith,
+          index = stepData.index,
+          value = stepData.value;
+      var fieldValue = getValueFromResponse(replaceImageAltTextWith, value, index, resType, resData);
+
+      if (isConditionSatisfied) {
+        return {
+          altText: fieldValue
+        };
+      }
+
+      return {};
+    } catch (e) {
+      console.log('Error: addAltText action failed', e);
+      return {};
+    }
+  }
+
+  function executeUpdateOnClickAction(stepData, response, isConditionSatisfied) {
+    try {
+      var resType = response.type,
+          resData = response.data;
+      var placeholder = stepData.placeholder,
+          replaceWith = stepData.replaceWith,
+          index = stepData.index,
+          value = stepData.value;
+      var fieldValue = getValueFromResponse(replaceWith, value, index, resType, resData);
+
+      if (isConditionSatisfied) {
+        return {
+          text: fieldValue,
+          placeholder: placeholder
+        };
+      }
+
+      return {};
+    } catch (e) {
+      console.log("Error: executeUpdateOnClickAction failed", e);
+      return {};
+    }
+  }
+
+  var executeMouseoverImageSwapAction = function executeMouseoverImageSwapAction(effects, fallBackSrc, stepData, response, isConditionSatisfied) {
+    try {
+      var resType = response.type,
+          resData = response.data;
+      var replaceImageWith = stepData.replaceImageWith,
+          src = stepData.src,
+          index = stepData.index;
+
+      if (isConditionSatisfied) {
+        var swapImageEffect = {
+          type: "imageToggle",
+          src: "",
+          changeSource: "",
+          triggerType: "hover",
+          supportsResize: true,
+          postDelay: 0,
+          duration: 500
+        };
+        var pushNewEffect = true;
+        if (!isEmpty(resData)) swapImageEffect.changeSource = "behavior";
+        var fieldValue = getValueFromResponse(replaceImageWith, src, index, resType, resData) || fallBackSrc;
+        if (isValidURL(fieldValue)) swapImageEffect.src = fieldValue;
+
+        if (effects && effects.length) {
+          effects.map(function (effect) {
+            if (effect.type === "imageToggle") {
+              effect.src = swapImageEffect.src;
+              effect.changeSource = "behavior";
+              pushNewEffect = false;
+            }
+          });
+        }
+
+        pushNewEffect ? effects.push(swapImageEffect) : {};
+      }
+
+      return effects;
+    } catch (e) {
+      console.log("Error: executeMouseoverImageSwapAction failed", e);
+      return {};
+    }
+  };
+
+  function executeAction(step, response) {
+    var data = step.data,
+        _step$data = step.data,
+        type = _step$data.type,
+        triggerId = _step$data.triggerId,
+        widgetId = _step$data.widgetId;
+    var cachedResponse; // showHide action don't have triggerId inside step
+
+    if (triggerId) cachedResponse = getResultFromCache(triggerId);
+    var parentDiv = getWidgetParentDiv(widgetId);
+
+    switch (type) {
+      case 'showHide':
+        {
+          var _updatedWidget = executeShowHideAction(data, response);
+
+          if (_updatedWidget.isHidden) {
+            try {
+              parentDiv.style.display = 'none';
+            } catch (err) {}
+
+            if (!connectVars.updatedWidgets[widgetId]) connectVars.updatedWidgets[widgetId] = [];
+            connectVars.updatedWidgets[widgetId].push(_objectSpread({}, _updatedWidget, {
+              type: type
+            }));
+          }
+
+          break;
+        }
+
+      case 'replaceImage':
+        {
+          var _updatedWidget2 = executeReplaceImageAction(data, cachedResponse, response);
+
+          try {
+            var imageWidgetElement = parentDiv.getElementsByTagName('img')[0];
+            imageWidgetElement.src = _updatedWidget2.src;
+            imageWidgetElement.removeAttribute("srcSet");
+            imageWidgetElement.style.objectFit = 'contain';
+          } catch (err) {}
+
+          if (!connectVars.updatedWidgets[widgetId]) connectVars.updatedWidgets[widgetId] = [];
+          connectVars.updatedWidgets[widgetId].push(_objectSpread({}, _updatedWidget2, {
+            type: type
+          }));
+          break;
+        }
+
+      case 'updateTextButton':
+        {
+          var _updatedWidget3 = executeUpdateTextButtonAction(data, cachedResponse, response);
+
+          try {
+            parentDiv.innerHTML = replaceAll(parentDiv.innerHTML, data.placeholder, _updatedWidget3.text);
+          } catch (err) {}
+
+          if (!connectVars.updatedWidgets[widgetId]) connectVars.updatedWidgets[widgetId] = [];
+          connectVars.updatedWidgets[widgetId].push(_objectSpread({}, _updatedWidget3, {
+            type: type
+          }));
+          break;
+        }
+
+      case 'addAltText':
+        {
+          var _updatedWidget4 = executeAddAltTextAction(data, cachedResponse, response);
+
+          if (_updatedWidget4.altText) {
+            try {
+              var _imageWidgetElement = parentDiv.getElementsByTagName('img')[0];
+              _imageWidgetElement.alt = _updatedWidget4.altText;
+              _imageWidgetElement.ariaLabel = _updatedWidget4.altText;
+            } catch (err) {}
+
+            if (!connectVars.updatedWidgets[widgetId]) connectVars.updatedWidgets[widgetId] = [];
+            connectVars.updatedWidgets[widgetId].push(_objectSpread({}, _updatedWidget4, {
+              type: type
+            }));
+          }
+
+          break;
+        }
+
+      case 'updateOnClick':
+        var updatedWidget = executeUpdateOnClickAction(data, cachedResponse, response);
+        var anchorElement = parentDiv.getElementsByTagName('a')[0];
+
+        if (updatedWidget.placeholder && updatedWidget.text) {
+          anchorElement.href = replaceAll(anchorElement.href, updatedWidget.placeholder, updatedWidget.text);
+          anchorElement.title = replaceAll(anchorElement.title, updatedWidget.placeholder, updatedWidget.text);
+        } else {
+          anchorElement.target = "top";
+          anchorElement.href = "";
+          anchorElement.title = "";
+        }
+
+        if (!connectVars.updatedWidgets[widgetId]) connectVars.updatedWidgets[widgetId] = [];
+        connectVars.updatedWidgets[widgetId].push(_objectSpread({}, updatedWidget, {
+          type: type
+        }));
+        break;
+
+      case 'mouseoverImageSwap':
+        {
+          pendingActions.push({
+            step: step,
+            parentData: response
+          });
+          break;
+        }
+    }
+
+    updateBehavior(step, connectVars.experienceIdWithExecutionCount, {});
+  }
+
+  function initWindowForBehaviorExecution(viewerDiv) {
+    if (!window["ZMAGS_API"]) {
+      window["ZMAGS_API"] = {
+        experiences: {}
+      };
+    }
+
+    if (!get(window, "ZMAGS_API.experiences.".concat(connectVars.experienceIdWithExecutionCount), undefined)) {
+      var steps = window['ZMAGS_PREVIEW'] && window[connectVars.overrideBehaviorsDataProperty] ? window[connectVars.overrideBehaviorsDataProperty][0].steps : window[connectVars.behaviorsDataProperty][0].steps;
+      cloneSteps(JSON.parse(JSON.stringify(steps)));
+      window.ZMAGS_API.experiences = _objectSpread({}, window.ZMAGS_API.experiences, _defineProperty({}, "".concat(connectVars.experienceIdWithExecutionCount), {
+        model: {
+          behavior: [{
+            steps: steps
+          }]
+        },
+        domRef: viewerDiv
+      }));
+    }
+
+    window[connectVars.ssrBehaviorCacheProperty] = {};
+  }
+
+  function executeBehavior(root, viewerDiv) {
+    initWindowForBehaviorExecution(viewerDiv);
+    pendingBranches = countBlockingCalls(root, false);
+    visitChildrenOfTrigger(root, {});
+  }
+})();
